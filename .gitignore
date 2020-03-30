@@ -7,4 +7,5 @@
 *.iml
 out
 gen
+.idea/.idea.project_bioscooop.dir/.idea/misc.xml
 bin/Release/
