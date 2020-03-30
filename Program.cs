@@ -6,11 +6,11 @@ namespace project_bioscooop
     internal class Program
     {
         private static int permission = 0;
-
-        private Dictionary<int, Movie> movieList = new Dictionary<int, Movie>();
-        private Dictionary<int, Ticket> ticketList = new Dictionary<int, Ticket>();
-        private Dictionary<string, Account> accountList = new Dictionary<string, Account>();
-        private Dictionary<int, Theater> theaterList = new Dictionary<int, Theater>();
+        
+        private Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
+        private Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
+        private Dictionary<int, Account> accountList = new Dictionary<int,Account>();
+        private Dictionary<int, Theater> theaterList = new Dictionary<int,Theater>();
 
         private const int STATE_EXIT = -1;
         private const int STATE_MAIN = 0;
