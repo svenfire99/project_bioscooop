@@ -50,22 +50,7 @@ namespace project_bioscooop
             bool creating = true;
             while (creating)
             {
-             /*Console.WriteLine("Lets begin with your name!\n");
-             name = Console.ReadLine();
-             Console.WriteLine("Now an easy to remember, hard to guess password:\n");
-             password = Console.ReadLine();
-
              
-             //check email
-             email = "default";
-             bool check = true;
-             while(!email.Contains("@"))
-             {
-                string output = !email.Contains("@") || email.Equals("default")?  "Great! on which email-adress can we reach you?\n" : "that's not a  real email! :(\n";
-                Console.WriteLine(output);
-                email = Console.ReadLine();
-             }
-             */
              
              string name = consoleGui.openQuestion("Lets begin with your name!");
              string password = consoleGui.openQuestion("Now an easy to remember, hard to guess password:");
@@ -89,12 +74,8 @@ namespace project_bioscooop
              //TODO add exit maybe by asking question of go back when finding error
              
             }
-            
-            
-            
-            
-
         }
+        
 
         
         
