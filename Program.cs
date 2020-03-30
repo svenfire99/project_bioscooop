@@ -9,7 +9,7 @@ namespace project_bioscooop
         
         private Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
         private Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
-        private Dictionary<string, Account> accountList = new Dictionary<string,Account>();
+        private Dictionary<int, Account> accountList = new Dictionary<int,Account>();
         private Dictionary<int, Theater> theaterList = new Dictionary<int,Theater>();
 
         private const int STATE_EXIT = -1;
@@ -17,68 +17,67 @@ namespace project_bioscooop
         private const int STATE_CREATE_ACCOUNT = 1;
         private const int STATE_LOG_IN = 2;
         private const int STATE_IS_LOGGED_IN = 3;
-        
-        
+
+
         private static int currentState = 0;
 
 
         public static void Main(string[] args)
         {
             //main loop
-            while (currentState != STATE_EXIT) {
+            while (currentState != STATE_EXIT)
+            {
                 switch (currentState)
                 {
-                    case STATE_MAIN: stateMain(); break;
-                    case STATE_CREATE_ACCOUNT: stateCreateAccount(); break;
+                    case STATE_MAIN:
+                        stateMain();
+                        break;
+                    case STATE_CREATE_ACCOUNT:
+                        stateCreateAccount();
+                        break;
                     //TODO add cases for LOG_IN, IS_LOGGED_IN
                 }
             }
         }
-        
+
         //states
         public static void stateMain()
         {
-            currentState = consoleGui.multipleChoice("Welcome to Cinema, What would you like to do?", "llogin", "ccreate account");
+            currentState = consoleGui.multipleChoice("Welcome to Cinema, What would you like to do?", "llogin",
+                "ccreate account");
             consoleGui.debugLine("currentstate: " + currentState);
         }
-        
+
         public static void stateCreateAccount()
         {
-            
             //intro
             Console.WriteLine("Cool! thanks for making an account with us :)\n");
             bool creating = true;
             while (creating)
             {
-             
-             
-             string name = consoleGui.openQuestion("Lets begin with your name!");
-             string password = consoleGui.openQuestion("Now an easy to remember, hard to guess password:");
-             string email = consoleGui.openQuestion("Great! on which email-adress can we reach you?", new string[]{"@","."},"that's not a  real email! :(");
-             int age = consoleGui.getInteger("Finally, and don't lie, How old are you?");
+                string name = consoleGui.openQuestion("Lets begin with your name!");
+                string password = consoleGui.openQuestion("Now an easy to remember, hard to guess password:");
+                string email = consoleGui.openQuestion("Great! on which email-adress can we reach you?",
+                    new string[] {"@", "."}, "that's not a  real email! :(");
+                int age = consoleGui.getInteger("Finally, and don't lie, How old are you?");
 
-             int isRight = consoleGui.multipleChoice("so you are " + name + " with password " + password +
-                                                     "\nthat we can reach on: " + email + " and you're " + age +
-                                                     " years old", "yyes", "nno");
-             
-             if (isRight == 0 && consoleGui.noErrorsInValue(name,password,email,age.ToString()))
-             {
-                 //TODO add customer
-                 //TODO set state to IS_LOGGED_IN
-             }
-             else
-             {
-                 Console.Out.WriteLine("\nWell then, let's try again\n");
-             }
+                int isRight = consoleGui.multipleChoice("so you are " + name + " with password " + password +
+                                                        "\nthat we can reach on: " + email + " and you're " + age +
+                                                        " years old", "yyes", "nno");
 
-             //TODO add exit maybe by asking question of go back when finding error
-             
+                if (isRight == 0 && consoleGui.noErrorsInValue(name, password, email, age.ToString()))
+                {
+                    //TODO add customer
+                    //TODO set state to IS_LOGGED_IN
+                }
+                else
+                {
+                    Console.Out.WriteLine("\nWell then, let's try again\n");
+                }
+
+                //TODO add exit maybe by asking question of go back when finding error
             }
         }
-        
-
-        
-        
 
         //classes
         public class Account
@@ -87,16 +86,16 @@ namespace project_bioscooop
             public readonly string name;
             public readonly int accountId;
             public readonly string email;
-            
+
             private static int AccountIDCounter = 0;
 
             private static int getAccountID()
             {
                 AccountIDCounter++;
                 return AccountIDCounter;
-            }        
-            
-            
+            }
+
+
             public Account(string inp_name, int inp_permission, string inp_email)
             {
                 permission = inp_permission;
@@ -104,14 +103,12 @@ namespace project_bioscooop
                 accountId = getAccountID();
                 name = inp_name;
             }
-                    
-        
         }
-        
+
         public static class Menu
         {
             static List<FoodItem> foodItems = new List<FoodItem>();
-            
+
 
             public class FoodItem
             {
@@ -132,7 +129,6 @@ namespace project_bioscooop
         {
             private DateTime time;
             private int price;
-
         }
 
         public class Theater
@@ -142,17 +138,14 @@ namespace project_bioscooop
         }
 
 
-        
-        
         //the engine
         public static class consoleGui
         {
-            
             //method that will create a choice dialog
             public static string openQuestion(string question, string[]? checks, string? negativeResponse)
             {
-                 string output = "";
-                 
+                string output = "";
+
                 //base output: 
                 if (checks == null && negativeResponse == null)
                 {
@@ -172,13 +165,13 @@ namespace project_bioscooop
                     {
                         output = Console.ReadLine();
                         bool satisfactitory = true;
-                        
+
                         //exit if exit command is given
                         if (output.Equals("exit"))
                         {
                             return "ERROR";
                         }
-                        
+
                         //loop throught the checks and see if they're met
                         foreach (string check in checks)
                         {
@@ -194,7 +187,7 @@ namespace project_bioscooop
                         {
                             return output;
                         }
-                        else if(negativeResponse != null)
+                        else if (negativeResponse != null)
                         {
                             Console.Out.WriteLine(negativeResponse);
                             Console.Out.WriteLine("try again or type exit if you don't know");
@@ -203,13 +196,10 @@ namespace project_bioscooop
                         {
                             Console.Out.WriteLine("that's not right, try again or type exit if you don't know");
                         }
-                        
                     }
                 }
-                
-                
 
-                
+
                 return output;
             }
 
@@ -221,15 +211,14 @@ namespace project_bioscooop
 
             //method that returns an int corresponding to answer given
             //returns -1 when exited by exit option
-            public static int multipleChoice(string question,params string[] options)
+            public static int multipleChoice(string question, params string[] options)
             {
                 Console.Out.WriteLine("\n" + question);
                 while (true)
                 {
-                    
                     //list all possible inputs and prepare for answer
                     string[] possibleInputs = new string[options.Length];
-                    for(int i = 0; i < options.Length; i++)
+                    for (int i = 0; i < options.Length; i++)
                     {
                         //distill info
                         string option = options[i];
@@ -241,12 +230,12 @@ namespace project_bioscooop
                         possibleInputs[i] = newAns;
                         Console.Out.WriteLine(listOption);
                     }
-                    
+
                     //add exit for escape
                     Console.Out.WriteLine("[X] Exit\n");
                     string ans = Console.ReadLine().ToUpper();
-                    
-                    
+
+
                     //get and check answer against possible answers
                     if (ans.Equals("X"))
                     {
@@ -261,21 +250,21 @@ namespace project_bioscooop
                                 return i;
                             }
                         }
+
                         Console.Out.WriteLine("Thats not an option, type \"X\" if you don't know");
                     }
-                    
-                    
-                }//end of mpq while(true) loop
-            }// end of mpq method
+                } //end of mpq while(true) loop
+            } // end of mpq method
 
             public static int getInteger(string question)
             {
                 Console.Out.WriteLine("\n" + question);
-                
-                
-                while(true){
+
+
+                while (true)
+                {
                     string input = Console.ReadLine();
-                    
+
                     //create escape
                     if (input.Equals("exit"))
                     {
@@ -308,13 +297,9 @@ namespace project_bioscooop
                         return false;
                     }
                 }
+
                 return true;
             }
-            
-            
         }
-        
-        
-
     }
 }

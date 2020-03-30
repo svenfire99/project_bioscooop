@@ -1,0 +1,7 @@
+﻿# Created by .ignore support plugin (hsz.mobi)
+.idea
+*.iml
+out
+gen
+.idea/.idea.project_bioscooop.dir/.idea/misc.xml
+bin/Release/
