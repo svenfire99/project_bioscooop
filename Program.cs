@@ -7,10 +7,10 @@ namespace project_bioscooop
     {
         private static int permission = 0;
         
-        private Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
-        private Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
-        private Dictionary<int, Account> accountList = new Dictionary<int,Account>();
-        private Dictionary<int, Theater> theaterList = new Dictionary<int,Theater>();
+        private static Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
+        private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
+        private static Dictionary<string, Account> accountList = new Dictionary<string,Account>();
+        private static Dictionary<int, Theater> theaterList = new Dictionary<int,Theater>();
 
         private const int STATE_EXIT = -1;
         private const int STATE_MAIN = 0;
@@ -18,12 +18,18 @@ namespace project_bioscooop
         private const int STATE_LOG_IN = 2;
         private const int STATE_IS_LOGGED_IN = 3;
 
+        private const int STATE_MANAGER_ADD_MOVIE = 11;
+
 
         private static int currentState = 0;
+        private static Account activeUser = null;
 
 
         public static void Main(string[] args)
         {
+            //setup
+            setup();
+            
             //main loop
             while (currentState != STATE_EXIT)
             {
@@ -35,17 +41,42 @@ namespace project_bioscooop
                     case STATE_CREATE_ACCOUNT:
                         stateCreateAccount();
                         break;
-                    //TODO add cases for LOG_IN, IS_LOGGED_IN
+                    case STATE_IS_LOGGED_IN:
+                        stateLoggedIn();
+                        break;
+                    case STATE_MANAGER_ADD_MOVIE:
+                        stateManagerAddMovie();
+                        break;
+                    case STATE_LOG_IN:
+                        stateLogin();
+                        break;
                 }
             }
         }
 
+        //everything to start the program
+        public static void setup()
+        {
+            //create admin account
+            accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
+            
+        }
+        
         //states
         public static void stateMain()
         {
-            currentState = consoleGui.multipleChoice("Welcome to Cinema, What would you like to do?", "llogin",
+            int choice = ConsoleGui.multipleChoice("Welcome to Cinema, What would you like to do?", "llogin",
                 "ccreate account");
-            consoleGui.debugLine("currentstate: " + currentState);
+            switch (choice)
+            {
+                case 0: 
+                    currentState = STATE_LOG_IN;
+                    break;
+                
+                case 1:
+                    currentState = STATE_CREATE_ACCOUNT;
+                    break;
+            }
         }
 
         public static void stateCreateAccount()
@@ -55,37 +86,237 @@ namespace project_bioscooop
             bool creating = true;
             while (creating)
             {
-                string name = consoleGui.openQuestion("Lets begin with your name!");
-                string password = consoleGui.openQuestion("Now an easy to remember, hard to guess password:");
-                string email = consoleGui.openQuestion("Great! on which email-adress can we reach you?",
+                string name = ConsoleGui.openQuestion("Lets begin with your name!");
+                
+                //exit strategy
+                if (name.Equals("exit"))
+                {
+                    currentState = STATE_MAIN;
+                    return;
+                }
+                
+                //get values
+                string password = ConsoleGui.openQuestion("Now an easy to remember, hard to guess password:");
+                string email = ConsoleGui.openQuestion("Great! on which email-adress can we reach you?",
                     new string[] {"@", "."}, "that's not a  real email! :(");
-                int age = consoleGui.getInteger("Finally, and don't lie, How old are you?");
+                int age = ConsoleGui.getInteger("Finally, and don't lie, How old are you?");
 
-                int isRight = consoleGui.multipleChoice("so you are " + name + " with password " + password +
+                int isRight = ConsoleGui.multipleChoice("So you are " + name + " with password " + password +
                                                         "\nthat we can reach on: " + email + " and you're " + age +
                                                         " years old", "yyes", "nno");
 
-                if (isRight == 0 && consoleGui.noErrorsInValue(name, password, email, age.ToString()))
+                if (isRight == 0 && ConsoleGui.noErrorsInValue(name, password, email, age.ToString()))
                 {
-                    //TODO add customer
-                    //TODO set state to IS_LOGGED_IN
+                    var newAcc = new Account(name, password, age, email, 0);
+                    if (!accountList.ContainsKey(email)){
+                        accountList.Add(email, newAcc);
+                        activeUser = newAcc;
+                        currentState = STATE_IS_LOGGED_IN;
+                        return;
+                    }
+                    else
+                    {
+                        while (accountList.ContainsKey(email))
+                        {
+                            email =ConsoleGui.openQuestion("Uh-oh that email is already taken." +
+                                                    "\n type exit or let's find one that isn't");
+                            if (email.Equals("exit"))
+                            {
+                                currentState = STATE_MAIN;
+                                return;
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    Console.Out.WriteLine("\nWell then, let's try again\n");
+                    Console.Out.WriteLine("\nWell then, let's try again or type exit to go back\n");
                 }
 
-                //TODO add exit maybe by asking question of go back when finding error
+                
             }
         }
+
+        public static void stateLoggedIn()
+        {
+            Action<int> userMenu = (int role) =>
+            {
+                if (role == Account.ROLE_USER)
+                {
+                    //TODO add 
+                    //switch case for user menu
+                    switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
+                        "ccheck available movies", "ssee my account"))
+                    {
+                        case -1:
+                            activeUser = null;
+                            currentState = STATE_MAIN;
+                            break;
+                    }
+                }
+                else
+                {
+                    ConsoleGui.debugLine("something went horribly wrong with the permissions");
+                    activeUser = null;
+                    currentState = STATE_MAIN;
+                }
+
+            };
+            
+            Action<int> catererMenu = (int role) =>
+            {
+                if (role == Account.ROLE_CATERING)
+                {
+                    //TODO add 
+                    //switch case for catering menu
+                    switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
+                        "ccheck available movies", "ssee my account"))
+                    {
+                        case -1:
+                            activeUser = null;
+                            currentState = STATE_MAIN;
+                            break;
+                    }
+                }
+                else
+                {
+                    ConsoleGui.debugLine("something went horribly wrong with the permissions");
+                    activeUser = null;
+                    currentState = STATE_MAIN;
+                }
+
+            };
+            
+            Action<int> employeeMenu = (int role) =>
+            {
+                if (role == Account.ROLE_EMPLOYEE)
+                {
+                    //TODO add 
+                    //switch case for employee menu
+                    switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
+                        "ccheck available movies", "ssee my account"))
+                    {
+                        case -1:
+                            activeUser = null;
+                            currentState = STATE_MAIN;
+                            break;
+                    }
+                }
+                else
+                {
+                    ConsoleGui.debugLine("something went horribly wrong with the permissions");
+                    activeUser = null;
+                    currentState = STATE_MAIN;
+                }
+
+            };
+            
+            Action<int> adminMenu = (int role) =>
+            {
+                if (role == Account.ROLE_ADMIN)
+                {
+                    //TODO add 
+                    //switch case for user menu
+                    switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
+                        "aadd movie"))
+                    {
+                        case -1:
+                            activeUser = null;
+                            currentState = STATE_MAIN;
+                            break;
+                        
+                        case 0:
+                            currentState = STATE_MANAGER_ADD_MOVIE;
+                            break;
+                    }
+                }
+                else
+                {
+                    ConsoleGui.debugLine("something went horribly wrong with the permissions");
+                    activeUser = null;
+                    currentState = STATE_MAIN;
+                }
+
+            };
+
+            switch (activeUser.role)
+            {
+                case 0: userMenu(activeUser.role); break; 
+                case 1: catererMenu(activeUser.role); break; 
+                case 2: employeeMenu(activeUser.role); break; 
+                case 3: adminMenu(activeUser.role); break; 
+            }
+
+
+
+        }
+
+        public static void stateLogin()
+        {
+            Console.Out.WriteLine("\nWith what email address do you want to log in?");
+            
+            //get account corresponding to email adress
+            string logInEmail = "";
+            while (!accountList.ContainsKey(logInEmail))
+            {
+                
+                //fetch account corresponding to email
+                logInEmail = ConsoleGui.openQuestion("Please enter your email or type exit if you don't know: ");
+                
+                
+                if (logInEmail == "exit")
+                {
+                    currentState = STATE_MAIN;
+                    return;
+                }
+                else if(!accountList.ContainsKey(logInEmail))
+                {
+                    Console.Out.WriteLine("We don't know that one");
+                }
+            }
+
+            //verify using password
+            Account potentialUserAcc = accountList[logInEmail];
+            if (ConsoleGui.openQuestion("Please enter your password", new string[] {potentialUserAcc.password}
+                    , " password is wrong, please try again") == "ERROR")
+            {
+                activeUser = null;
+                currentState = STATE_MAIN;
+            }
+            else
+            {
+                activeUser = potentialUserAcc;
+                currentState = STATE_IS_LOGGED_IN;
+            }
+            
+
+
+
+
+        }
+
+        public static void stateManagerAddMovie()
+        {
+            //TODO please make sure there is an "exit" option that returns:  "ERROR" :)  tools can be found in consoleGui
+        }
+        
+        
+        
 
         //classes
         public class Account
         {
-            public readonly int permission;
+            public static readonly int ROLE_USER = 0;
+            public static readonly int ROLE_CATERING = 1;
+            public static readonly int ROLE_EMPLOYEE = 2;
+            public static readonly int ROLE_ADMIN = 3;
+                
+            public readonly int role;
             public readonly string name;
             public readonly int accountId;
             public readonly string email;
+            public readonly string password;
+            public readonly int age;
 
             private static int AccountIDCounter = 0;
 
@@ -96,12 +327,14 @@ namespace project_bioscooop
             }
 
 
-            public Account(string inp_name, int inp_permission, string inp_email)
+            public Account(string inp_name, string inp_password, int inp_age, string inp_email, int inp_permission)
             {
-                permission = inp_permission;
+                role = inp_permission;
                 email = inp_email;
                 accountId = getAccountID();
                 name = inp_name;
+                password = inp_password;
+                age = inp_age;
             }
         }
 
@@ -136,10 +369,11 @@ namespace project_bioscooop
             public readonly int theaterId;
             private int[] prices;
         }
+        
 
 
         //the engine
-        public static class consoleGui
+        public static class ConsoleGui
         {
             //method that will create a choice dialog
             public static string openQuestion(string question, string[]? checks, string? negativeResponse)
@@ -209,8 +443,7 @@ namespace project_bioscooop
                 return openQuestion(question, null, null);
             }
 
-            //method that returns an int corresponding to answer given
-            //returns -1 when exited by exit option
+                                
             public static int multipleChoice(string question, params string[] options)
             {
                 Console.Out.WriteLine("\n" + question);
@@ -297,7 +530,6 @@ namespace project_bioscooop
                         return false;
                     }
                 }
-
                 return true;
             }
         }
