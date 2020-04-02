@@ -59,7 +59,8 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
-            
+            Generator.generateMovieData(100, movieList);
+            Generator.generateUserData(100, accountList);
         }
         
         //states
@@ -533,5 +534,21 @@ namespace project_bioscooop
                 return true;
             }
         }
+
+        public static class Generator
+        {
+            public static void generateMovieData(int amountOfDataEntries, Dictionary<int, Movie> inp_movieDict)
+            {
+                // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
+            }
+            
+            public static void generateUserData(int amountOfDataEntries, Dictionary<string, Account> inp_userDict)
+            {
+                // code to generate 'amountOfDataEntries' x random user and add them to inp_userDict
+            }
+            
+        }
+        
+        
     }
 }
