@@ -6,6 +6,13 @@
     <e p="C:\Users\Ahmet Özkan\source\repos\project_bioscooop" t="IncludeRecursive">
       <e p=".git\info\exclude" t="IncludeRecursive" />
       <e p=".gitignore" t="Include" />
+      <e p=".vs" t="Include">
+        <e p="project_bioscooop" t="Include">
+          <e p="v16" t="Include">
+            <e p=".suo" t="Include" />
+          </e>
+        </e>
+      </e>
       <e p="bin" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive">
         <e p="Debug" t="Include">
