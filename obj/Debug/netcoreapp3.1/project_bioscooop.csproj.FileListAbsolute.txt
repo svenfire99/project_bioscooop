@@ -9,3 +9,16 @@ C:\Users\kevin\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_b
 C:\Users\kevin\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.AssemblyInfo.cs
 C:\Users\kevin\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.dll
 C:\Users\kevin\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.pdb
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\bin\Debug\netcoreapp3.1\project_bioscooop.exe
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\bin\Debug\netcoreapp3.1\project_bioscooop.deps.json
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\bin\Debug\netcoreapp3.1\project_bioscooop.runtimeconfig.json
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\bin\Debug\netcoreapp3.1\project_bioscooop.runtimeconfig.dev.json
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\bin\Debug\netcoreapp3.1\project_bioscooop.dll
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\bin\Debug\netcoreapp3.1\project_bioscooop.pdb
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.csprojAssemblyReference.cache
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.csproj.CoreCompileInputs.cache
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.AssemblyInfoInputs.cache
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.AssemblyInfo.cs
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.dll
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.pdb
+C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.genruntimeconfig.cache
