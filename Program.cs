@@ -625,10 +625,8 @@ namespace project_bioscooop
             public static void generateMovieData(int amountOfDataEntries, Dictionary<int, Movie> inp_movieDict)
             {
                 // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
-                for (int i = 0; i < amountOfDataEntries; i++)
-                {
-                    inp_movieDict.Add(i + 1, userNameGen(), randNum.Next(60, 180), randNum.Next(15, 45));
-
+                for (int i = 0; i < amountOfDataEntries; i++) {
+                    inp_movieDict.Add(i + 1, new Movie(userNameGen(), randNum.Next(60, 180), randNum.Next(15, 45)));
                 }
             }
 
