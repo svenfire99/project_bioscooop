@@ -22,3 +22,8 @@ C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\proje
 C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.dll
 C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.pdb
 C:\Users\Eigenaarr\RiderProjects\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.genruntimeconfig.cache
+C:\Users\Robin\Desktop\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.csprojAssemblyReference.cache
+C:\Users\Robin\Desktop\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.AssemblyInfoInputs.cache
+C:\Users\Robin\Desktop\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.AssemblyInfo.cs
+C:\Users\Robin\Desktop\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.dll
+C:\Users\Robin\Desktop\project_bioscooop\obj\Debug\netcoreapp3.1\project_bioscooop.pdb

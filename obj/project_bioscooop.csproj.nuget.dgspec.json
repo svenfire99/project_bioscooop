@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Eigenaarr\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj": {}
+    "C:\\Users\\Robin\\Desktop\\project_bioscooop\\project_bioscooop.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Eigenaarr\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj": {
+    "C:\\Users\\Robin\\Desktop\\project_bioscooop\\project_bioscooop.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Eigenaarr\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj",
+        "projectUniqueName": "C:\\Users\\Robin\\Desktop\\project_bioscooop\\project_bioscooop.csproj",
         "projectName": "project_bioscooop",
-        "projectPath": "C:\\Users\\Eigenaarr\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj",
-        "packagesPath": "C:\\Users\\Eigenaarr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Eigenaarr\\RiderProjects\\project_bioscooop\\obj\\",
+        "projectPath": "C:\\Users\\Robin\\Desktop\\project_bioscooop\\project_bioscooop.csproj",
+        "packagesPath": "C:\\Users\\Robin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Robin\\Desktop\\project_bioscooop\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\",
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Eigenaarr\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Robin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.1"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

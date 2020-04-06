@@ -374,10 +374,15 @@ namespace project_bioscooop
             public int price;
         }
 
-        public class Movie
-        {
-            private DateTime time;
-            private int price;
+        public class Movie {
+            private string movieName;
+            private int movieTime;
+            private double moviePrice;
+            public Movie(string name, int time, int price) {
+                movieName = name;
+                movieTime = time;
+                moviePrice = price;
+            }
         }
 
         public class Theater
@@ -610,18 +615,70 @@ namespace project_bioscooop
 
         public static class Generator
         {
+            private static Random randNum = new Random();
+            // list of usable characters
+            private static char[] charList = {'a','b','c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+                'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_' };
+            private static string[] emailOptions = { "@gmail.com", "@hotmail.com", "@outlook.com" };
+
             public static void generateMovieData(int amountOfDataEntries, Dictionary<int, Movie> inp_movieDict)
             {
                 // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
+                for (int i = 0; i < amountOfDataEntries; i++)
+                {
+                    inp_movieDict.Add(i + 1, userNameGen(), randNum.Next(60, 180), randNum.Next(15, 45));
+
+                }
             }
-            
+
             public static void generateUserData(int amountOfDataEntries, Dictionary<string, Account> inp_userDict)
             {
                 // code to generate 'amountOfDataEntries' x random user and add them to inp_userDict
+                for (int i = 0; i < amountOfDataEntries; i++)
+                {
+                    string email = emailGen();
+                    accountList.Add(email, new Account(userNameGen(), passwordGen(), randNum.Next(16, 100), email, Account.ROLE_USER));
+                }
             }
-            
+
+            public static string userNameGen()
+            {
+                string userName = "";
+
+                // generates the random name
+                for (int i = 0; i < randNum.Next(4, 15); i++)
+                {
+                    userName += charList[randNum.Next(charList.Length)];
+                }
+                return userName;
+            }
+
+            public static string passwordGen()
+            {
+                string password = "";
+
+                // generates the random name
+                for (int i = 0; i < randNum.Next(3, 8); i++)
+                {
+                    password += charList[randNum.Next(charList.Length)];
+                }
+                return password;
+            }
+
+            public static string emailGen()
+            {
+                string email = "";
+                // generates the random email
+                for (int i = 0; i < randNum.Next(6, 20); i++)
+                {
+                    email += charList[randNum.Next(charList.Length)];
+                }
+                email += emailOptions[randNum.Next(emailOptions.Length)];
+                return email;
+
+            }
         }
-        
-        
+
     }
 }
