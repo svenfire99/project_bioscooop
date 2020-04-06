@@ -5,8 +5,8 @@
 # IntelliJ project files
 *.idea
 *.iml
-*bin
-*obj
+*.bin
+*.obj
 out
 gen
 .idea/.idea.project_bioscooop.dir/.idea/misc.xml
