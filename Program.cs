@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace project_bioscooop
 {
@@ -9,7 +12,7 @@ namespace project_bioscooop
         
         private static Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
         private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
-        private static Dictionary<string, Account> accountList = new Dictionary<string,Account>();
+        private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
         private static Dictionary<int, Theater> theaterList = new Dictionary<int,Theater>();
         private static Dictionary<int, Menu.FoodItem> menuItem = new Dictionary<int, Menu.FoodItem>();
 
@@ -285,7 +288,7 @@ namespace project_bioscooop
             }
 
             //verify using password
-            Account potentialUserAcc = accountList[logInEmail];
+            Account potentialUserAcc = (Account)accountList[logInEmail];
             if (ConsoleGui.openQuestion("Please enter your password", new string[] {potentialUserAcc.password}
                     , " password is wrong, please try again") == "ERROR")
             {
@@ -313,7 +316,7 @@ namespace project_bioscooop
         
 
         //classes
-        public class Account
+        public class Account : ConsoleGui.Element
         {
             public static readonly int ROLE_USER = 0;
             public static readonly int ROLE_CATERING = 1;
@@ -344,6 +347,16 @@ namespace project_bioscooop
                 name = inp_name;
                 password = inp_password;
                 age = inp_age;
+            }
+
+            public override void list()
+            {
+                Console.Out.WriteLine("id: " + accountId + "   name: " + name + "   email: " + email);
+            }
+
+            public override string getMPQListing()
+            {
+                return "id: " + accountId + "   name: " + name;
             }
         }
 
@@ -380,6 +393,7 @@ namespace project_bioscooop
         }
         
 
+        
 
         //the engine
         public static class ConsoleGui
@@ -452,7 +466,9 @@ namespace project_bioscooop
                 return openQuestion(question, null, null);
             }
 
-                                
+            
+            //TODO change multipleChoice to accept numbers as first input by taking a substring until first non numeral char
+            
             public static int multipleChoice(string question, params string[] options)
             {
                 Console.Out.WriteLine("\n" + question);
@@ -462,11 +478,26 @@ namespace project_bioscooop
                     string[] possibleInputs = new string[options.Length];
                     for (int i = 0; i < options.Length; i++)
                     {
-                        //distill info
                         string option = options[i];
-                        string newAns = option.Substring(0, 1).ToUpper();
-                        string firstChar = option.Substring(1, 1).ToUpper();
-                        string listOption = "[" + newAns + "]" + " " + firstChar + option.Substring(2);
+                        
+                        //count how many numeral chars are in this possible answer to account for inputs beginning with numbers
+                        int lenghtOfExpectedUserInput = 1;
+                        for (int j = 0; j < option.Length; j++)
+                        {
+                            if (!Char.IsDigit(option[j]))
+                            {
+                                break;
+                            }
+                            else if(j+1 > lenghtOfExpectedUserInput)
+                            {
+                                lenghtOfExpectedUserInput = j+1;
+                            }
+                        }
+                        
+                        //distill info
+                        string newAns = option.Substring(0, lenghtOfExpectedUserInput).ToUpper();
+                        string firstChar = option.Substring(lenghtOfExpectedUserInput, 1).ToUpper();
+                        string listOption = "[" + newAns + "]" + " " + firstChar + option.Substring(lenghtOfExpectedUserInput+1);
 
                         //list option and save possible answer
                         possibleInputs[i] = newAns;
@@ -495,9 +526,11 @@ namespace project_bioscooop
 
                         Console.Out.WriteLine("Thats not an option, type \"X\" if you don't know");
                     }
-                } //end of mpq while(true) loop
-            } // end of mpq method
-
+                }
+            } 
+            
+            
+            
             public static int getInteger(string question)
             {
                 Console.Out.WriteLine("\n" + question);
@@ -541,6 +574,44 @@ namespace project_bioscooop
                 }
                 return true;
             }
+            
+            
+            public abstract class Element
+            {
+                public abstract void list();
+
+                public abstract string getMPQListing();
+
+            }
+
+            public static Element getElementByMultipleChoice(String question, List<Element> inputList)
+            {
+                // extract possible ans as string from elements
+                string[] elements = new string[inputList.Count];
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    elements[i] = i + inputList[i].getMPQListing();
+                }
+
+                int ans = multipleChoice(question, elements);
+
+                if (ans >= 0)
+                {
+                    return inputList[ans];
+                }
+                return null;
+            }
+
+            public static Element getElementByMultipleChoice(String question, Dictionary<string, Element> inputDict)
+            {
+                return getElementByMultipleChoice(question, inputDict.Values.ToList());
+            }
+            
+            public static Element getElementByMultipleChoice(String question, Element[] inputArray)
+            {
+                return getElementByMultipleChoice(question, inputArray.ToList());
+            }
+            
         }
 
         public static class Generator
