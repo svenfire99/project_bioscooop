@@ -69,7 +69,7 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer", new Account("caterer", "caterer", 69, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
             Generator.generateMovieData(100, movieList);
         }
         
