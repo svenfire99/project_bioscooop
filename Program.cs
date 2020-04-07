@@ -14,6 +14,7 @@ namespace project_bioscooop
         private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
         private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
         private static Dictionary<int, Theater> theaterList = new Dictionary<int,Theater>();
+        private static Dictionary<int, Menu.FoodItem> menuItem = new Dictionary<int, Menu.FoodItem>();
 
         private const int STATE_EXIT = -1;
         private const int STATE_MAIN = 0;
@@ -22,6 +23,9 @@ namespace project_bioscooop
         private const int STATE_IS_LOGGED_IN = 3;
 
         private const int STATE_MANAGER_ADD_MOVIE = 11;
+        
+        
+        private const int STATE_CATERER_CHANGE_MENU = 21;
 
 
         private static int currentState = 0;
@@ -53,6 +57,9 @@ namespace project_bioscooop
                     case STATE_LOG_IN:
                         stateLogin();
                         break;
+                    // case STATE_CATERER_CHANGE_MENU:
+                    //     
+                    //     break;
                 }
             }
         }
@@ -62,10 +69,8 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
-            
-            
+            accountList.Add("caterer", new Account("caterer", "caterer", 69, "caterer@gmail.com", Account.ROLE_CATERING));
             Generator.generateMovieData(100, movieList);
-            //Generator.generateUserData(100, accountList);
         }
         
         //states
@@ -176,7 +181,7 @@ namespace project_bioscooop
                     //TODO add 
                     //switch case for catering menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account"))
+                        "llist food items ", "aadd food items"))
                     {
                         case -1:
                             activeUser = null;
