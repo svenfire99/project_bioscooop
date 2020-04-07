@@ -25,7 +25,7 @@ namespace project_bioscooop
         private const int STATE_MANAGER_ADD_MOVIE = 11;
         
         
-        private const int STATE_CATERER_CHANGE_MENU = 21;
+        private const int STATE_ADD_FOOD_ITEM = 21;
 
 
         private static int currentState = 0;
@@ -57,9 +57,9 @@ namespace project_bioscooop
                     case STATE_LOG_IN:
                         stateLogin();
                         break;
-                    // case STATE_CATERER_CHANGE_MENU:
-                    //     
-                    //     break;
+                    case STATE_ADD_FOOD_ITEM:
+                        stateCateringAddMenuItem();
+                        break;
                 }
             }
         }
@@ -69,7 +69,7 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("catering", new Account("catering", "catering", 420, "catering", Account.ROLE_CATERING));
             Generator.generateMovieData(100, movieList);
         }
         
@@ -186,6 +186,14 @@ namespace project_bioscooop
                         case -1:
                             activeUser = null;
                             currentState = STATE_MAIN;
+                            break;
+                        case 0:
+                            activeUser = null;
+                            currentState = STATE_MAIN; //TODO make shit
+                            break;
+                        case 1:
+                            activeUser = null;
+                            currentState = STATE_ADD_FOOD_ITEM;
                             break;
                     }
                 }
@@ -310,8 +318,12 @@ namespace project_bioscooop
         {
             //TODO please make sure there is an "exit" option that returns:  "ERROR" :)  tools can be found in consoleGui
         }
-        
-        
+
+        public static void stateCateringAddMenuItem()
+        {
+            //TODO ALI   catering method
+            ConsoleGui.debugLine("yo");
+        }
         
 
         //classes

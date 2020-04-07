@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ali\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj": {}
+    "C:\\Users\\kevin\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ali\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj": {
+    "C:\\Users\\kevin\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ali\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj",
+        "projectUniqueName": "C:\\Users\\kevin\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj",
         "projectName": "project_bioscooop",
-        "projectPath": "C:\\Users\\ali\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj",
-        "packagesPath": "C:\\Users\\ali\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ali\\RiderProjects\\project_bioscooop\\obj\\",
+        "projectPath": "C:\\Users\\kevin\\RiderProjects\\project_bioscooop\\project_bioscooop.csproj",
+        "packagesPath": "C:\\Users\\kevin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\kevin\\RiderProjects\\project_bioscooop\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\ali\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\kevin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
