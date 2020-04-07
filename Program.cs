@@ -63,8 +63,6 @@ namespace project_bioscooop
             //create admin account
             accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
             
-            //create cathering account
-            accountList.Add("catering", new Account( "catering", "catering", 420, "catering", Account.ROLE_CATERING));
             
             Generator.generateMovieData(100, movieList);
             //Generator.generateUserData(100, accountList);
@@ -175,7 +173,7 @@ namespace project_bioscooop
             {
                 if (role == Account.ROLE_CATERING)
                 {
-                    //TODO ALI add 
+                    //TODO add 
                     //switch case for catering menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
                         "ccheck available movies", "ssee my account"))
