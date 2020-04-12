@@ -13,7 +13,7 @@ namespace project_bioscooop
         private static Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
         private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
         private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
-        private static Dictionary<int, Theater> theaterList = new Dictionary<int,Theater>();
+        private static Dictionary<int, ConsoleGui.Element> theaterList = new Dictionary<int, ConsoleGui.Element>();
         private static Dictionary<int, Menu.FoodItem> menuItem = new Dictionary<int, Menu.FoodItem>();
 
         private const int STATE_EXIT = -1;
@@ -23,6 +23,9 @@ namespace project_bioscooop
         private const int STATE_IS_LOGGED_IN = 3;
 
         private const int STATE_MANAGER_ADD_MOVIE = 11;
+        private const int STATE_MANAGER_REMOVE_MOVIE = 12;
+        private const int STATE_MANAGER_ADD_THEATER = 13;
+        private const int STATE_MANAGER_REMOVE_THEATER = 14;
         
         
         private const int STATE_CATERER_CHANGE_MENU = 21;
@@ -229,7 +232,7 @@ namespace project_bioscooop
                     //TODO add 
                     //switch case for user menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "aadd movie"))
+                        "1add movie", "2remove", "3addTheater", "4removeTheater"))
                     {
                         case -1:
                             activeUser = null;
@@ -239,6 +242,19 @@ namespace project_bioscooop
                         case 0:
                             currentState = STATE_MANAGER_ADD_MOVIE;
                             break;
+                        
+                        case 1:
+                            currentState = STATE_MANAGER_REMOVE_MOVIE;
+                            break;
+                        
+                        case 2:
+                            currentState = STATE_MANAGER_ADD_THEATER;
+                            break;
+                        
+                        case 3:
+                            currentState = STATE_MANAGER_REMOVE_THEATER;
+                            break;
+                        
                     }
                 }
                 else
@@ -309,6 +325,33 @@ namespace project_bioscooop
         public static void stateManagerAddMovie()
         {
             //TODO please make sure there is an "exit" option that returns:  "ERROR" :)  tools can be found in consoleGui
+        }
+
+        public static void stateManagerRemoveMovie()
+        {
+            //TODO write stateManagerRemoveMovie()
+            Console.Out.WriteLine("stateManagerRemoveMovie");
+        }
+
+        public static void stateManagerAddTheater()
+        {
+            int index = 0;
+            while (true)
+            {
+                int seats =ConsoleGui.getInteger("please specify the amount of seats in price group " + index);
+                //return to menu if exit
+                if (seats < 0)
+                {
+                    currentState = STATE_IS_LOGGED_IN;
+                    return;
+                }
+            }
+            
+        }
+        
+        public static void stateManagerRemoveTheater()
+        {
+            //TODO write stateManagerRemoveTheater()
         }
         
         
@@ -381,14 +424,128 @@ namespace project_bioscooop
 
         public class Movie
         {
+            private string title;
             private DateTime time;
-            private int price;
-        }
+            //private int price; removed because theaters have prices movies don't?
 
-        public class Theater
+            public string getTitle;
+
+            public Movie(string inp_title, DateTime inp_dateTime)
+            {
+                title = inp_title;
+                time = inp_dateTime;
+            }
+            
+            public static Movie getNoneMovie()
+            {
+                return new Movie("None", new DateTime(0,0,0,0,0,0));
+            }
+        }
+        
+        public class Theater : ConsoleGui.Element
         {
-            public readonly int theaterId;
-            private int[] prices;
+            private readonly int theaterId;
+            private readonly int amountOfSeats;
+            private SeatGroup[] seatGroups;
+            private Movie currentMovie;
+
+            private static int idCount = -1;
+
+            
+            // abstract methods
+            public override void list()
+            {
+                Console.Out.WriteLine(" Id: " + theaterId + " running: " + currentMovie.getTitle);
+            }
+
+            public override string getMPQListing()
+            {
+                return (" Id: " + theaterId + " running: " + currentMovie.getTitle + " seats available: " + getAvailableSeats() +
+                        " of " + amountOfSeats);
+            }
+
+            
+            // methods
+            public int getAvailableSeats()
+            {
+                int output = 0;
+                foreach (SeatGroup seatGroup in this.seatGroups )
+                {
+                    output += seatGroup.getAvailableAmountOfSeats();
+                }
+
+                return output;
+            }
+
+            public void setCurrentMovie()
+            {
+                //TODO add method for setting the movie runnning in theater
+            }
+
+            public Movie getCurrentMovie()
+            {
+                return currentMovie;
+            }
+
+            public void removeCurrentMovie()
+            {
+                //TODO add method to remove current movie
+            }
+
+            
+            // constructor
+            private Theater(params SeatGroup[] seatGroups)
+            {
+                theaterId = idCount++;
+                amountOfSeats = 0;
+                foreach (SeatGroup seatGroup in this.seatGroups )
+                {
+                    amountOfSeats += seatGroup.getAmountOfSeats();
+                }
+                
+                // theater will have a 'none' movie by default
+                currentMovie = Movie.getNoneMovie();
+            }
+            
+            //data holder for SeatGroup seats and prices
+            class SeatGroup
+            {
+                private int amountOfSeats;
+                private int amountOfAvailableSeats;
+                private int priceOfGroup;
+
+                public SeatGroup(int inp_amountOfSeats, int inp_priceOfSeats)
+                {
+                    amountOfSeats = inp_amountOfSeats;
+                    amountOfAvailableSeats = amountOfSeats;
+                    priceOfGroup = inp_priceOfSeats;
+                }
+
+                public void sellTicket()
+                {
+                    amountOfAvailableSeats--;
+                    //TODO change state to ticketSellingState
+                }
+
+                
+                //getters
+                public int getAvailableAmountOfSeats()
+                {
+                    return amountOfAvailableSeats;
+                }
+
+                public int getAmountOfSeats()
+                {
+                    return amountOfSeats;
+                }
+
+                public int getTicketPrice()
+                {
+                    return priceOfGroup;
+                }
+                
+            }
+            
         }
         
 
@@ -406,8 +563,12 @@ namespace project_bioscooop
                 if (checks == null && negativeResponse == null)
                 {
                     //just returns answer
-                    Console.Out.WriteLine("\n" + question);
+                    Console.Out.WriteLine("\n" + question + " \ntype exit if you don't know");
                     output = Console.ReadLine();
+                    if (output.Equals("exit"))
+                    {
+                        return "ERROR";
+                    }
                     return output;
                 }
                 //go into code that see if the checks are met
