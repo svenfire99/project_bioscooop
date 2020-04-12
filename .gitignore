@@ -3,9 +3,8 @@
 *.git
 *.vs
 *bin
-*bin/Debug
-*.iml
-*.obj
+*obj
+*iml
 out
 gen
 .idea/.idea.project_bioscooop.dir/.idea/misc.xml
