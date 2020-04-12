@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.VisualBasic;
 
 namespace project_bioscooop
 {
@@ -13,7 +14,7 @@ namespace project_bioscooop
         private static Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
         private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
         private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
-        private static Dictionary<int, Theater> theaterList = new Dictionary<int,Theater>();
+        private static Dictionary<int, ConsoleGui.Element> theaterList = new Dictionary<int, ConsoleGui.Element>();
         private static Dictionary<int, Menu.FoodItem> menuItem = new Dictionary<int, Menu.FoodItem>();
 
         private const int STATE_EXIT = -1;
@@ -23,6 +24,9 @@ namespace project_bioscooop
         private const int STATE_IS_LOGGED_IN = 3;
 
         private const int STATE_MANAGER_ADD_MOVIE = 11;
+        private const int STATE_MANAGER_REMOVE_MOVIE = 12;
+        private const int STATE_MANAGER_ADD_THEATER = 13;
+        private const int STATE_MANAGER_REMOVE_THEATER = 14;
         
         
         private const int STATE_CATERER_CHANGE_MENU = 21;
@@ -57,6 +61,12 @@ namespace project_bioscooop
                     case STATE_LOG_IN:
                         stateLogin();
                         break;
+                    case STATE_MANAGER_ADD_THEATER:
+                        stateManagerAddTheater();
+                        break;
+                    case STATE_MANAGER_REMOVE_THEATER:
+                        stateManagerRemoveTheater();
+                        break;
                     // case STATE_CATERER_CHANGE_MENU:
                     //     
                     //     break;
@@ -69,8 +79,11 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer", new Account("caterer", "caterer", 69, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
             Generator.generateMovieData(100, movieList);
+
+            Theater testTheater = new Theater(new Theater.SeatGroup(420, 69));
+            theaterList.Add(testTheater.getId(), testTheater);
         }
         
         //states
@@ -154,8 +167,7 @@ namespace project_bioscooop
             {
                 if (role == Account.ROLE_USER)
                 {
-                    //TODO add 
-                    //switch case for user menu
+                    //TODO add switch case for user menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
                         "ccheck available movies", "ssee my account"))
                     {
@@ -178,8 +190,7 @@ namespace project_bioscooop
             {
                 if (role == Account.ROLE_CATERING)
                 {
-                    //TODO add 
-                    //switch case for catering menu
+                    //TODO add switch case for catering menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
                         "llist food items ", "aadd food items"))
                     {
@@ -202,8 +213,7 @@ namespace project_bioscooop
             {
                 if (role == Account.ROLE_EMPLOYEE)
                 {
-                    //TODO add 
-                    //switch case for employee menu
+                    //TODO add switch case for employee menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
                         "ccheck available movies", "ssee my account"))
                     {
@@ -226,10 +236,9 @@ namespace project_bioscooop
             {
                 if (role == Account.ROLE_ADMIN)
                 {
-                    //TODO add 
-                    //switch case for user menu
+                    //TODO add switch case for Admin menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "aadd movie"))
+                        "1add movie", "2remove", "3addTheater", "4removeTheater"))
                     {
                         case -1:
                             activeUser = null;
@@ -239,6 +248,19 @@ namespace project_bioscooop
                         case 0:
                             currentState = STATE_MANAGER_ADD_MOVIE;
                             break;
+                        
+                        case 1:
+                            currentState = STATE_MANAGER_REMOVE_MOVIE;
+                            break;
+                        
+                        case 2:
+                            currentState = STATE_MANAGER_ADD_THEATER;
+                            break;
+                        
+                        case 3:
+                            currentState = STATE_MANAGER_REMOVE_THEATER;
+                            break;
+                        
                     }
                 }
                 else
@@ -309,6 +331,75 @@ namespace project_bioscooop
         public static void stateManagerAddMovie()
         {
             //TODO please make sure there is an "exit" option that returns:  "ERROR" :)  tools can be found in consoleGui
+        }
+
+        public static void stateManagerRemoveMovie()
+        {
+            //TODO write stateManagerRemoveMovie()
+            Console.Out.WriteLine("stateManagerRemoveMovie");
+        }
+
+        public static void stateManagerAddTheater()
+        {
+            List<Theater.SeatGroup> newSeatGroups = new List<Theater.SeatGroup>();
+            int index = 0;
+            bool adding = true;
+            while (adding)
+            {
+                int seats = ConsoleGui.getInteger("please specify the amount of seats in price group " + index);
+                //return to menu if exit
+                if (seats < 0)
+                {
+                    currentState = STATE_IS_LOGGED_IN;
+                    return;
+                }
+                int price = ConsoleGui.getInteger("please specify the price of seats in price group " + index);
+                //return to menu if exit
+                if (price < 0)
+                {
+                    currentState = STATE_IS_LOGGED_IN;
+                    return;
+                }
+                newSeatGroups.Add(new Theater.SeatGroup(seats, price));
+
+                int ans = ConsoleGui.multipleChoice("add another price group?", "yyes", "nno");
+                switch (ans)
+                {
+                    case -1: currentState = STATE_IS_LOGGED_IN; return;
+                    case 1: adding = false; break;
+                }
+            }
+
+            Console.Out.WriteLine(newSeatGroups.ToString());
+            Theater newTheater = new Theater(newSeatGroups.ToArray());
+            
+            int check = ConsoleGui.multipleChoice(
+                "You want to add Theater with id: " + newTheater.getId() + " with " + newTheater.getAmountOfSeats(),
+                "yyes", "nno");
+            switch (check)
+            {
+                case -1: case 1: currentState = STATE_IS_LOGGED_IN; return;
+                case 0: theaterList.Add(newTheater.getId(), newTheater); break;
+            }
+
+            Console.Out.WriteLine("Current theaters: \n");
+            ConsoleGui.list(theaterList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+
+        }
+        
+        public static void stateManagerRemoveTheater()
+        {
+            Theater theater = (Theater)ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
+            if (ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno") == 0)
+            {
+                theaterList.Remove(theater.getId());
+            }
+            
+            ConsoleGui.list(theaterList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
         }
         
         
@@ -381,14 +472,145 @@ namespace project_bioscooop
 
         public class Movie
         {
+            private string title;
             private DateTime time;
-            private int price;
-        }
+            //private int price; removed because theaters have prices movies don't?
 
-        public class Theater
+            public string getTitle()
+            {
+                return title;
+            }
+
+            public Movie(string inp_title, DateTime inp_dateTime)
+            {
+                title = inp_title;
+                time = inp_dateTime;
+            }
+            
+            public static Movie getNoneMovie()
+            {
+                return new Movie("None", new DateTime(2240,8,7,6,5,4));
+            }
+        }
+        
+        public class Theater : ConsoleGui.Element
         {
-            public readonly int theaterId;
-            private int[] prices;
+            private readonly int theaterId;
+            private readonly int amountOfSeats;
+            private SeatGroup[] seatGroups;
+            private Movie currentMovie;
+
+            private static int idCount = -1;
+
+            
+            // abstract methods
+            public override void list()
+            {
+                Console.Out.WriteLine(" Id: " + theaterId + " running: " + currentMovie.getTitle());
+            }
+
+            public override string getMPQListing()
+            {
+                return (" Id: " + theaterId + " running: " + currentMovie.getTitle() + " seats available: " + getAvailableSeats() +
+                        " of " + amountOfSeats);
+            }
+
+            
+            // methods
+            public int getAvailableSeats()
+            {
+                int output = 0;
+                foreach (SeatGroup seatGroup in this.seatGroups )
+                {
+                    output += seatGroup.getAvailableAmountOfSeats();
+                }
+
+                return output;
+            }
+            
+            
+            
+
+            public void setCurrentMovie()
+            {
+                //TODO add method for setting the movie runnning in theater
+            }
+
+            public Movie getCurrentMovie()
+            {
+                return currentMovie;
+            }
+
+            public void removeCurrentMovie()
+            {
+                //TODO add method to remove current movie
+            }
+
+            public int getId()
+            {
+                return theaterId;
+            }
+
+            public int getAmountOfSeats()
+            {
+                return amountOfSeats;
+            }
+
+
+            // constructor
+            public Theater(params SeatGroup[] seatGroups)
+            {
+                idCount++;
+                theaterId = idCount;
+                amountOfSeats = 0;
+                foreach (SeatGroup seatGroup in seatGroups )
+                {
+                    amountOfSeats += seatGroup.getAmountOfSeats();
+                }
+                
+                // theater will have a 'none' movie by default
+                currentMovie = Movie.getNoneMovie();
+            }
+            
+            //data holder for SeatGroup seats and prices
+            public class SeatGroup
+            {
+                private int amountOfSeats;
+                private int amountOfAvailableSeats;
+                private int priceOfGroup;
+
+                public SeatGroup(int inp_amountOfSeats, int inp_priceOfSeats)
+                {
+                    amountOfSeats = inp_amountOfSeats;
+                    amountOfAvailableSeats = amountOfSeats;
+                    priceOfGroup = inp_priceOfSeats;
+                }
+
+                public void sellTicket()
+                {
+                    amountOfAvailableSeats--;
+                    //TODO change state to ticketSellingState
+                }
+
+                
+                //getters
+                public int getAvailableAmountOfSeats()
+                {
+                    return amountOfAvailableSeats;
+                }
+
+                public int getAmountOfSeats()
+                {
+                    return amountOfSeats;
+                }
+
+                public int getTicketPrice()
+                {
+                    return priceOfGroup;
+                }
+                
+            }
+            
         }
         
 
@@ -406,8 +628,12 @@ namespace project_bioscooop
                 if (checks == null && negativeResponse == null)
                 {
                     //just returns answer
-                    Console.Out.WriteLine("\n" + question);
+                    Console.Out.WriteLine("\n" + question + " \ntype exit if you don't know");
                     output = Console.ReadLine();
+                    if (output.Equals("exit"))
+                    {
+                        return "ERROR";
+                    }
                     return output;
                 }
                 //go into code that see if the checks are met
@@ -583,6 +809,30 @@ namespace project_bioscooop
 
             }
 
+            
+            public static void list(IEnumerable iterable)
+            {
+
+                
+                if (iterable is IDictionary)
+                {
+                    IDictionary dict = (IDictionary) iterable;
+                    foreach (Element element in dict.Values)
+                    {
+                        element.list();
+                    }
+                }
+                else
+                {
+                    foreach (Element element in (IEnumerable)iterable)
+                    {
+                        element.list();
+                    }
+                }
+                
+                
+            }
+            
             public static Element getElementByMultipleChoice(String question, List<Element> inputList)
             {
                 // extract possible ans as string from elements
@@ -601,9 +851,9 @@ namespace project_bioscooop
                 return null;
             }
 
-            public static Element getElementByMultipleChoice(String question, Dictionary<string, Element> inputDict)
+            public static Element getElementByMultipleChoice(String question, IDictionary inputDict)
             {
-                return getElementByMultipleChoice(question, inputDict.Values.ToList());
+                return getElementByMultipleChoice(question, (List<Element>)inputDict.Values);
             }
             
             public static Element getElementByMultipleChoice(String question, Element[] inputArray)
