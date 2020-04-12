@@ -527,6 +527,8 @@ namespace project_bioscooop
 
                 return output;
             }
+            
+            
 
             public void setCurrentMovie()
             {
