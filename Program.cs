@@ -529,6 +529,7 @@ namespace project_bioscooop
             }
             
             
+            
 
             public void setCurrentMovie()
             {
