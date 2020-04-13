@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.VisualBasic;
 
 namespace project_bioscooop
@@ -41,9 +44,28 @@ namespace project_bioscooop
             //setup
             setup();
             
+            // When application starts system makes new folder structure with a .json file in it
+            string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
+            DirectoryInfo di = Directory.CreateDirectory(path);
+
+            string subFolder = System.IO.Path.Combine(path, "SubFolder");
+            DirectoryInfo su = Directory.CreateDirectory(subFolder);
+
+            string fileName = "MyNewFile.json";
+            subFolder = System.IO.Path.Combine(subFolder, fileName);
+            
+            if (!System.IO.File.Exists(subFolder))
+            {
+                using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
+                {
+                    Console.WriteLine("File created!");
+                }
+            }
+
             //main loop
             while (currentState != STATE_EXIT)
             {
+
                 switch (currentState)
                 {
                     case STATE_MAIN:
@@ -67,9 +89,6 @@ namespace project_bioscooop
                     case STATE_MANAGER_REMOVE_THEATER:
                         stateManagerRemoveTheater();
                         break;
-                    // case STATE_CATERER_CHANGE_MENU:
-                    //     
-                    //     break;
                 }
             }
         }
