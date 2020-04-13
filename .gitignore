@@ -1,13 +1,10 @@
-﻿# Created by .ignore support plugin (hsz.mobi)
-### Example user template template
-### Example user template
-
-# IntelliJ project files
+﻿# IntelliJ project files
 *.idea
-*.iml
-*.bin
-*.obj
+*.git
+*.vs
+*bin
+*obj
+*iml
 out
 gen
 .idea/.idea.project_bioscooop.dir/.idea/misc.xml
-bin/Release/
