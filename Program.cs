@@ -17,8 +17,11 @@ namespace project_bioscooop
         private static Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
         private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
         private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
+
         public static Dictionary<string, ConsoleGui.Element> theaterList = new Dictionary<string, ConsoleGui.Element>();
         private static Dictionary<int, Menu.FoodItem> menuItem = new Dictionary<int, Menu.FoodItem>();
+
+        private static Dictionary<int, ConsoleGui.Element> menuItem = new Dictionary<int, ConsoleGui.Element>();
 
         private const int STATE_EXIT = -1;
         private const int STATE_MAIN = 0;
@@ -211,9 +214,9 @@ namespace project_bioscooop
             {
                 if (role == Account.ROLE_CATERING)
                 {
-                    //TODO add switch case for catering menu
+                    //TODO(Ali) add switch case for catering menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "llist food items ", "aadd food items"))
+                        "llist food items ", "aadd food items", "nNieuwAliItem"))
                     {
                         case -1:
                             activeUser = null;
@@ -479,10 +482,20 @@ namespace project_bioscooop
             static List<FoodItem> foodItems = new List<FoodItem>();
 
 
-            public class FoodItem
+            public class FoodItem : ConsoleGui.Element
             {
                 private String[] ingredients;
                 private int price;
+                public override void list()
+                {
+                    //TODO(Ali) welk zinnetje er in het menu moet komen waar je niks hoeft te kiezen
+                }
+
+                public override string getMPQListing()
+                {
+                    //TODO(Ali) welk zinnetje er in de multiplechoice moet komen
+                    return "";
+                }
             }
         }
 
