@@ -19,7 +19,6 @@ namespace project_bioscooop
         private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
 
         public static Dictionary<string, ConsoleGui.Element> theaterList = new Dictionary<string, ConsoleGui.Element>();
-        private static Dictionary<int, Menu.FoodItem> menuItem = new Dictionary<int, Menu.FoodItem>();
 
         private static Dictionary<int, ConsoleGui.Element> menuItem = new Dictionary<int, ConsoleGui.Element>();
 
