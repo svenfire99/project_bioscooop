@@ -419,9 +419,14 @@ namespace project_bioscooop
         {
             // Console.Out.WriteLine("theaterlist type: " + typeof(theaterList));
             Theater theater = (Theater)ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
-            if (ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno") == 0)
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            if (ans == 0 && theater != null)
             {
                 theaterList.Remove(theater.getId());
+            }
+            else if (ans == -1)
+            {
+                currentState = STATE_IS_LOGGED_IN;
             }
             
             ConsoleGui.list(theaterList);
@@ -505,7 +510,7 @@ namespace project_bioscooop
             public readonly Theater Theater;
             public readonly Movie movie;
             public int price;
-        }
+        } 
 
         public class Movie
         {
