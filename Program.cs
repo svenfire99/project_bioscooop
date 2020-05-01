@@ -33,6 +33,9 @@ namespace project_bioscooop
         private const int STATE_MANAGER_EDIT_MOVIE = 13;
         private const int STATE_MANAGER_ADD_THEATER = 14;
         private const int STATE_MANAGER_REMOVE_THEATER = 15;
+        private const int STATE_MANAGER_MANAGE_THEATER = 16;
+        
+        
         
         
         private const int STATE_CATERER_CHANGE_MENU = 21;
@@ -599,7 +602,17 @@ namespace project_bioscooop
             public readonly Theater Theater;
             public readonly Movie movie;
             public int price;
-        } 
+            
+            public override void list()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override string getMPQListing()
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public class Movie : ConsoleGui.Element
         {
@@ -666,6 +679,8 @@ namespace project_bioscooop
             private readonly string theaterId;
             private readonly int amountOfSeats;
             private SeatGroup[] seatGroups;
+            private TimeSlot[] timeSlots;
+
             private Movie currentMovie;
 
             private static int idCount = -1;
@@ -731,6 +746,22 @@ namespace project_bioscooop
             {
                 return amountOfSeats;
             }
+            
+            // returns amount of available timeslots
+            public int getAmountOfavailableTimeslots()
+            {
+                int output = 0;
+                foreach (TimeSlot timeSlot in timeSlots)
+                {
+                    if (timeSlot.getMovie().getTitle().Equals("None"))
+                    {
+                        output++;
+                    }
+                }
+
+                return output;
+            }
+            
 
 
             // constructor
@@ -750,6 +781,14 @@ namespace project_bioscooop
                 
                 // theater will have a 'none' movie by default
                 currentMovie = Movie.getNoneMovie();
+
+                // initialize timeslots
+                timeSlots = new[]
+                {
+                    new TimeSlot(new TimeSpan(19,0,0), new TimeSpan(20,0,0) ),
+                    new TimeSlot(new TimeSpan(20,0,0), new TimeSpan(21,0,0) ),
+                    new TimeSlot(new TimeSpan(21,0,0), new TimeSpan(22,0,0) ),
+                };
             }
             
             //data holder for SeatGroup seats and prices
@@ -795,6 +834,38 @@ namespace project_bioscooop
                 {
                     return description;
                 }
+                
+            }
+
+            public class TimeSlot : ConsoleGui.Element
+            {
+                private Movie runningMovie = Movie.getNoneMovie();
+                private TimeSpan begin;
+                private TimeSpan end;
+                    
+                public override void list()
+                {
+                    Console.Out.WriteLine(getMPQListing());
+                }
+
+                public override string getMPQListing()
+                {
+                    return "from: " + begin + " to: " + end + " Currently runs: " + runningMovie.getTitle();
+                }
+
+                public Movie getMovie()
+                {
+                    return runningMovie;
+                }
+
+                public TimeSlot(TimeSpan inp_begin, TimeSpan inp_end)
+                {
+                    begin = inp_begin;
+                    end = inp_end;
+                    runningMovie = Movie.getNoneMovie();
+                }
+                
+                
                 
             }
             
