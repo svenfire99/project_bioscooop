@@ -13,10 +13,12 @@ namespace project_bioscooop
     internal class Program
     {
         private static int permission = 0;
-        
-        private static Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
-        private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
-        private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
+
+        private static Dictionary<int, Movie> movieList = new Dictionary<int, Movie>();
+        private static Dictionary<int, Ticket> ticketList = new Dictionary<int, Ticket>();
+
+        private static Dictionary<string, ConsoleGui.Element>
+            accountList = new Dictionary<string, ConsoleGui.Element>();
 
         public static Dictionary<string, ConsoleGui.Element> theaterList = new Dictionary<string, ConsoleGui.Element>();
 
@@ -32,9 +34,11 @@ namespace project_bioscooop
         private const int STATE_MANAGER_REMOVE_MOVIE = 12;
         private const int STATE_MANAGER_ADD_THEATER = 13;
         private const int STATE_MANAGER_REMOVE_THEATER = 14;
-        
-        
+
+
+        private const int STATE_CATERER_ADD_MENU = 20;
         private const int STATE_CATERER_CHANGE_MENU = 21;
+        private const int STATE_CATERER_REMOVE_MENU = 22;
 
 
         private static int currentState = 0;
@@ -45,7 +49,7 @@ namespace project_bioscooop
         {
             //setup
             setup();
-            
+
             // When application starts system makes new folder structure with a .json file in it
             string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
             DirectoryInfo di = Directory.CreateDirectory(path);
@@ -55,7 +59,7 @@ namespace project_bioscooop
 
             string fileName = "MyNewFile.json";
             subFolder = System.IO.Path.Combine(subFolder, fileName);
-            
+
             if (!System.IO.File.Exists(subFolder))
             {
                 using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
@@ -67,7 +71,6 @@ namespace project_bioscooop
             //main loop
             while (currentState != STATE_EXIT)
             {
-
                 switch (currentState)
                 {
                     case STATE_MAIN:
@@ -91,6 +94,15 @@ namespace project_bioscooop
                     case STATE_MANAGER_REMOVE_THEATER:
                         stateManagerRemoveTheater();
                         break;
+                    case STATE_CATERER_ADD_MENU:
+                        stateCatererAddMenu();
+                        break;
+                    case STATE_CATERER_CHANGE_MENU:
+                        stateCatererChangeMenu();
+                        break;
+                    case STATE_CATERER_REMOVE_MENU:
+                        stateCatererRemoveMenu();
+                        break;
                 }
             }
         }
@@ -99,8 +111,9 @@ namespace project_bioscooop
         public static void setup()
         {
             //create admin account
-            accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("admin", new Account("admin", "admin", 420, "admin", Account.ROLE_ADMIN));
+            accountList.Add("caterer",
+                new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
             Generator.generateMovieData(100, movieList);
 
             Theater testTheater = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
@@ -108,7 +121,7 @@ namespace project_bioscooop
             theaterList.Add(testTheater.getId(), testTheater);
             theaterList.Add(testTheater2.getId(), testTheater2);
         }
-        
+
         //states
         public static void stateMain()
         {
@@ -116,10 +129,10 @@ namespace project_bioscooop
                 "ccreate account");
             switch (choice)
             {
-                case 0: 
+                case 0:
                     currentState = STATE_LOG_IN;
                     break;
-                
+
                 case 1:
                     currentState = STATE_CREATE_ACCOUNT;
                     break;
@@ -134,14 +147,14 @@ namespace project_bioscooop
             while (creating)
             {
                 string name = ConsoleGui.openQuestion("Lets begin with your name!");
-                
+
                 //exit strategy
                 if (name.Equals("exit"))
                 {
                     currentState = STATE_MAIN;
                     return;
                 }
-                
+
                 //get values
                 string password = ConsoleGui.openQuestion("Now an easy to remember, hard to guess password:");
                 string email = ConsoleGui.openQuestion("Great! on which email-adress can we reach you?",
@@ -155,7 +168,8 @@ namespace project_bioscooop
                 if (isRight == 0 && ConsoleGui.noErrorsInValue(name, password, email, age.ToString()))
                 {
                     var newAcc = new Account(name, password, age, email, 0);
-                    if (!accountList.ContainsKey(email)){
+                    if (!accountList.ContainsKey(email))
+                    {
                         accountList.Add(email, newAcc);
                         activeUser = newAcc;
                         currentState = STATE_IS_LOGGED_IN;
@@ -165,8 +179,8 @@ namespace project_bioscooop
                     {
                         while (accountList.ContainsKey(email))
                         {
-                            email =ConsoleGui.openQuestion("Uh-oh that email is already taken." +
-                                                    "\n type exit or let's find one that isn't");
+                            email = ConsoleGui.openQuestion("Uh-oh that email is already taken." +
+                                                            "\n type exit or let's find one that isn't");
                             if (email.Equals("exit"))
                             {
                                 currentState = STATE_MAIN;
@@ -179,8 +193,6 @@ namespace project_bioscooop
                 {
                     Console.Out.WriteLine("\nWell then, let's try again or type exit to go back\n");
                 }
-
-                
             }
         }
 
@@ -206,9 +218,8 @@ namespace project_bioscooop
                     activeUser = null;
                     currentState = STATE_MAIN;
                 }
-
             };
-            
+
             Action<int> catererMenu = (int role) =>
             {
                 if (role == Account.ROLE_CATERING)
@@ -221,6 +232,18 @@ namespace project_bioscooop
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
+                        case 0:
+                            activeUser = null;
+                            currentState = STATE_CATERER_ADD_MENU;
+                            break;
+                        case 1:
+                            activeUser = null;
+                            currentState = STATE_CATERER_CHANGE_MENU;
+                            break;
+                        case 2:
+                            activeUser = null;
+                            currentState = STATE_CATERER_REMOVE_MENU;
+                            break;
                     }
                 }
                 else
@@ -229,9 +252,8 @@ namespace project_bioscooop
                     activeUser = null;
                     currentState = STATE_MAIN;
                 }
-
             };
-            
+
             Action<int> employeeMenu = (int role) =>
             {
                 if (role == Account.ROLE_EMPLOYEE)
@@ -252,9 +274,8 @@ namespace project_bioscooop
                     activeUser = null;
                     currentState = STATE_MAIN;
                 }
-
             };
-            
+
             Action<int> adminMenu = (int role) =>
             {
                 if (role == Account.ROLE_ADMIN)
@@ -267,23 +288,22 @@ namespace project_bioscooop
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
-                        
+
                         case 0:
                             currentState = STATE_MANAGER_ADD_MOVIE;
                             break;
-                        
+
                         case 1:
                             currentState = STATE_MANAGER_REMOVE_MOVIE;
                             break;
-                        
+
                         case 2:
                             currentState = STATE_MANAGER_ADD_THEATER;
                             break;
-                        
+
                         case 3:
                             currentState = STATE_MANAGER_REMOVE_THEATER;
                             break;
-                        
                     }
                 }
                 else
@@ -292,49 +312,52 @@ namespace project_bioscooop
                     activeUser = null;
                     currentState = STATE_MAIN;
                 }
-
             };
 
             switch (activeUser.role)
             {
-                case 0: userMenu(activeUser.role); break; 
-                case 1: catererMenu(activeUser.role); break; 
-                case 2: employeeMenu(activeUser.role); break; 
-                case 3: adminMenu(activeUser.role); break; 
+                case 0:
+                    userMenu(activeUser.role);
+                    break;
+                case 1:
+                    catererMenu(activeUser.role);
+                    break;
+                case 2:
+                    employeeMenu(activeUser.role);
+                    break;
+                case 3:
+                    adminMenu(activeUser.role);
+                    break;
             }
-
-
-
         }
 
         public static void stateLogin()
         {
             Console.Out.WriteLine("\nWith what email address do you want to log in?");
-            
+
             //get account corresponding to email adress
             string logInEmail = "";
             while (!accountList.ContainsKey(logInEmail))
             {
-                
                 //fetch account corresponding to email
                 logInEmail = ConsoleGui.openQuestion("Please enter your email or type exit if you don't know: ");
-                
-                
+
+
                 if (logInEmail == "exit")
                 {
                     currentState = STATE_MAIN;
                     return;
                 }
-                else if(!accountList.ContainsKey(logInEmail))
+                else if (!accountList.ContainsKey(logInEmail))
                 {
                     Console.Out.WriteLine("We don't know that one");
                 }
             }
 
             //verify using password
-            Account potentialUserAcc = (Account)accountList[logInEmail];
+            Account potentialUserAcc = (Account) accountList[logInEmail];
             if (ConsoleGui.openQuestion("Please enter your password", new string[] {potentialUserAcc.password}
-                    , " password is wrong, please try again") == "ERROR")
+                , " password is wrong, please try again") == "ERROR")
             {
                 activeUser = null;
                 currentState = STATE_MAIN;
@@ -344,11 +367,6 @@ namespace project_bioscooop
                 activeUser = potentialUserAcc;
                 currentState = STATE_IS_LOGGED_IN;
             }
-            
-
-
-
-
         }
 
         public static void stateManagerAddMovie()
@@ -376,6 +394,7 @@ namespace project_bioscooop
                     currentState = STATE_IS_LOGGED_IN;
                     return;
                 }
+
                 int price = ConsoleGui.getInteger("please specify the price of seats in price group " + index);
                 string description = ConsoleGui.openQuestion("please write a description for seatgroup " + index);
                 //return to menu if exit
@@ -384,40 +403,51 @@ namespace project_bioscooop
                     currentState = STATE_IS_LOGGED_IN;
                     return;
                 }
+
                 newSeatGroups.Add(new Theater.SeatGroup(seats, price, description));
 
                 int ans = ConsoleGui.multipleChoice("add another price group?", "yyes", "nno");
                 switch (ans)
                 {
-                    case -1: currentState = STATE_IS_LOGGED_IN; return;
-                    case 1: adding = false; break;
+                    case -1:
+                        currentState = STATE_IS_LOGGED_IN;
+                        return;
+                    case 1:
+                        adding = false;
+                        break;
                 }
             }
 
-            
+
             Theater newTheater = new Theater(newSeatGroups.ToArray());
-            
-            
+
+
             int check = ConsoleGui.multipleChoice(
-                "You want to add Theater with id: " + newTheater.getId() + " with " + newTheater.getAmountOfSeats() + newTheater.seatGroupsToString(),
+                "You want to add Theater with id: " + newTheater.getId() + " with " + newTheater.getAmountOfSeats() +
+                newTheater.seatGroupsToString(),
                 "yyes", "nno");
             switch (check)
             {
-                case -1: case 1: currentState = STATE_IS_LOGGED_IN; return;
-                case 0: theaterList.Add(newTheater.getId(), newTheater); break;
+                case -1:
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    return;
+                case 0:
+                    theaterList.Add(newTheater.getId(), newTheater);
+                    break;
             }
 
             Console.Out.WriteLine("Current theaters: \n");
             ConsoleGui.list(theaterList);
             currentState = STATE_IS_LOGGED_IN;
             return;
-
         }
-        
+
         public static void stateManagerRemoveTheater()
         {
             // Console.Out.WriteLine("theaterlist type: " + typeof(theaterList));
-            Theater theater = (Theater)ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
+            Theater theater =
+                (Theater) ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
             int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
             if (ans == 0 && theater != null)
             {
@@ -427,14 +457,12 @@ namespace project_bioscooop
             {
                 currentState = STATE_IS_LOGGED_IN;
             }
-            
+
             ConsoleGui.list(theaterList);
             currentState = STATE_IS_LOGGED_IN;
             return;
         }
-        
-        
-        
+
 
         //classes
         public class Account : ConsoleGui.Element
@@ -443,7 +471,7 @@ namespace project_bioscooop
             public static readonly int ROLE_CATERING = 1;
             public static readonly int ROLE_EMPLOYEE = 2;
             public static readonly int ROLE_ADMIN = 3;
-                
+
             public readonly int role;
             public readonly string name;
             public readonly int accountId;
@@ -490,6 +518,7 @@ namespace project_bioscooop
             {
                 private String[] ingredients;
                 private int price;
+
                 public override void list()
                 {
                     //TODO(Ali) welk zinnetje er in het menu moet komen waar je niks hoeft te kiezen
@@ -509,11 +538,12 @@ namespace project_bioscooop
             public readonly Theater Theater;
             public readonly Movie movie;
             public int price;
-        } 
+        }
 
         public class Movie
         {
             private string title;
+
             private DateTime time;
             //private int price; removed because theaters have prices movies don't?
 
@@ -527,13 +557,13 @@ namespace project_bioscooop
                 title = inp_title;
                 time = inp_dateTime;
             }
-            
+
             public static Movie getNoneMovie()
             {
-                return new Movie("None", new DateTime(2240,8,7,6,5,4));
+                return new Movie("None", new DateTime(2240, 8, 7, 6, 5, 4));
             }
         }
-        
+
         public class Theater : ConsoleGui.Element
         {
             private readonly string theaterId;
@@ -543,7 +573,7 @@ namespace project_bioscooop
 
             private static int idCount = -1;
 
-            
+
             // abstract methods
             public override void list()
             {
@@ -552,16 +582,17 @@ namespace project_bioscooop
 
             public override string getMPQListing()
             {
-                return (" Id: " + theaterId + " running: " + currentMovie.getTitle() + " seats available: " + getAvailableSeats() +
+                return (" Id: " + theaterId + " running: " + currentMovie.getTitle() + " seats available: " +
+                        getAvailableSeats() +
                         " of " + amountOfSeats);
             }
-            
-            
+
+
             // methods
             public int getAvailableSeats()
             {
                 int output = 0;
-                foreach (SeatGroup seatGroup in this.seatGroups )
+                foreach (SeatGroup seatGroup in this.seatGroups)
                 {
                     output += seatGroup.getAvailableAmountOfSeats();
                 }
@@ -609,22 +640,21 @@ namespace project_bioscooop
             // constructor
             public Theater(params SeatGroup[] inp_seatGroups)
             {
-                
                 idCount++;
                 theaterId = idCount.ToString();
                 amountOfSeats = 0;
-                foreach (SeatGroup seatGroup in inp_seatGroups )
+                foreach (SeatGroup seatGroup in inp_seatGroups)
                 {
                     amountOfSeats += seatGroup.getAmountOfSeats();
                 }
-                
+
                 //add given seatgroup to instance variables
                 seatGroups = inp_seatGroups;
-                
+
                 // theater will have a 'none' movie by default
                 currentMovie = Movie.getNoneMovie();
             }
-            
+
             //data holder for SeatGroup seats and prices
             public class SeatGroup
             {
@@ -647,7 +677,7 @@ namespace project_bioscooop
                     //TODO change state to ticketSellingState
                 }
 
-                
+
                 //getters
                 public int getAvailableAmountOfSeats()
                 {
@@ -668,13 +698,9 @@ namespace project_bioscooop
                 {
                     return description;
                 }
-                
             }
-            
         }
-        
 
-        
 
         //the engine
         public static class ConsoleGui
@@ -694,6 +720,7 @@ namespace project_bioscooop
                     {
                         return "ERROR";
                     }
+
                     return output;
                 }
                 //go into code that see if the checks are met
@@ -751,9 +778,9 @@ namespace project_bioscooop
                 return openQuestion(question, null, null);
             }
 
-            
+
             //TODO change multipleChoice to accept numbers as first input by taking a substring until first non numeral char
-            
+
             public static int multipleChoice(string question, params string[] options)
             {
                 Console.Out.WriteLine("\n" + question);
@@ -764,7 +791,7 @@ namespace project_bioscooop
                     for (int i = 0; i < options.Length; i++)
                     {
                         string option = options[i];
-                        
+
                         //count how many numeral chars are in this possible answer to account for inputs beginning with numbers
                         int lenghtOfExpectedUserInput = 1;
                         for (int j = 0; j < option.Length; j++)
@@ -773,16 +800,17 @@ namespace project_bioscooop
                             {
                                 break;
                             }
-                            else if(j+1 > lenghtOfExpectedUserInput)
+                            else if (j + 1 > lenghtOfExpectedUserInput)
                             {
-                                lenghtOfExpectedUserInput = j+1;
+                                lenghtOfExpectedUserInput = j + 1;
                             }
                         }
-                        
+
                         //distill info
                         string newAns = option.Substring(0, lenghtOfExpectedUserInput).ToUpper();
                         string firstChar = option.Substring(lenghtOfExpectedUserInput, 1).ToUpper();
-                        string listOption = "[" + newAns + "]" + " " + firstChar + option.Substring(lenghtOfExpectedUserInput+1);
+                        string listOption = "[" + newAns + "]" + " " + firstChar +
+                                            option.Substring(lenghtOfExpectedUserInput + 1);
 
                         //list option and save possible answer
                         possibleInputs[i] = newAns;
@@ -812,10 +840,9 @@ namespace project_bioscooop
                         Console.Out.WriteLine("Thats not an option, type \"X\" if you don't know");
                     }
                 }
-            } 
-            
-            
-            
+            }
+
+
             public static int getInteger(string question)
             {
                 Console.Out.WriteLine("\n" + question);
@@ -857,23 +884,21 @@ namespace project_bioscooop
                         return false;
                     }
                 }
+
                 return true;
             }
-            
-            
+
+
             public abstract class Element
             {
                 public abstract void list();
 
                 public abstract string getMPQListing();
-
             }
 
-            
+
             public static void list(IEnumerable iterable)
             {
-
-                
                 if (iterable is IDictionary)
                 {
                     IDictionary dict = (IDictionary) iterable;
@@ -884,15 +909,13 @@ namespace project_bioscooop
                 }
                 else
                 {
-                    foreach (Element element in (IEnumerable)iterable)
+                    foreach (Element element in (IEnumerable) iterable)
                     {
                         element.list();
                     }
                 }
-                
-                
             }
-            
+
             public static Element getElementByMultipleChoice(String question, List<Element> inputList)
             {
                 // extract possible ans as string from elements
@@ -908,20 +931,21 @@ namespace project_bioscooop
                 {
                     return inputList[ans];
                 }
+
                 return null;
             }
 
-            public static Element getElementByMultipleChoice(String question, Dictionary<string, Element> inputDict) // was IDictionary inputDict
+            public static Element
+                getElementByMultipleChoice(String question,
+                    Dictionary<string, Element> inputDict) // was IDictionary inputDict
             {
-                
                 return getElementByMultipleChoice(question, (inputDict.Values.ToList()));
             }
-            
+
             public static Element getElementByMultipleChoice(String question, Element[] inputArray)
             {
                 return getElementByMultipleChoice(question, inputArray.ToList());
             }
-            
         }
 
         public static class Generator
@@ -930,14 +954,11 @@ namespace project_bioscooop
             {
                 // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
             }
-            
+
             public static void generateUserData(int amountOfDataEntries, Dictionary<string, Account> inp_userDict)
             {
                 // code to generate 'amountOfDataEntries' x random user and add them to inp_userDict
             }
-            
         }
-        
-        
     }
 }
