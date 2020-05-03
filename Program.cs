@@ -138,6 +138,9 @@ namespace project_bioscooop
                 "ccreate account");
             switch (choice)
             {
+                case -1:
+                    currentState = STATE_EXIT;
+                    break;
                 case 0: 
                     currentState = STATE_LOG_IN;
                     break;
