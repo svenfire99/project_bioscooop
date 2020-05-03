@@ -394,9 +394,18 @@ namespace project_bioscooop
         public static void stateManagerRemoveMovie()
         {
             Movie movie = (Movie)ConsoleGui.getElementByMultipleChoice("Which movie would you like to remove?", movieList);
-            if (ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno") == 0)
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            if (ans == 0 && movie != null)
             {
-                theaterList.Remove(movie.getId());
+                if (movie.getTitle() != "None")
+                {
+                    theaterList.Remove(movie.getId());
+                }
+            }
+            else
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
             }
             
             ConsoleGui.list(movieList);
