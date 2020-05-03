@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
@@ -14,7 +14,7 @@ namespace project_bioscooop
     {
         private static int permission = 0;
         
-        private static Dictionary<int, Movie> movieList = new Dictionary<int,Movie>();
+        public static Dictionary<string, ConsoleGui.Element> movieList = new Dictionary<string, ConsoleGui.Element>();
         private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
         private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
 
@@ -30,8 +30,9 @@ namespace project_bioscooop
 
         private const int STATE_MANAGER_ADD_MOVIE = 11;
         private const int STATE_MANAGER_REMOVE_MOVIE = 12;
-        private const int STATE_MANAGER_ADD_THEATER = 13;
-        private const int STATE_MANAGER_REMOVE_THEATER = 14;
+        private const int STATE_MANAGER_EDIT_MOVIE = 13;
+        private const int STATE_MANAGER_ADD_THEATER = 14;
+        private const int STATE_MANAGER_REMOVE_THEATER = 15;
         
         
         private const int STATE_CATERER_CHANGE_MENU = 21;
@@ -81,6 +82,12 @@ namespace project_bioscooop
                         break;
                     case STATE_MANAGER_ADD_MOVIE:
                         stateManagerAddMovie();
+                        break;
+                    case STATE_MANAGER_REMOVE_MOVIE:
+                        stateManagerRemoveMovie();
+                        break;
+                    case STATE_MANAGER_EDIT_MOVIE:
+                        stateManagerEditMovie();
                         break;
                     case STATE_LOG_IN:
                         stateLogin();
@@ -261,7 +268,7 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for Admin menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "1add movie", "2remove movie", "3add theater", "4remove theater"))
+                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater"))
                     {
                         case -1:
                             activeUser = null;
@@ -277,10 +284,14 @@ namespace project_bioscooop
                             break;
                         
                         case 2:
-                            currentState = STATE_MANAGER_ADD_THEATER;
+                            currentState = STATE_MANAGER_EDIT_MOVIE;
                             break;
                         
                         case 3:
+                            currentState = STATE_MANAGER_ADD_THEATER;
+                            break;
+                        
+                        case 4:
                             currentState = STATE_MANAGER_REMOVE_THEATER;
                             break;
                         
@@ -353,13 +364,100 @@ namespace project_bioscooop
 
         public static void stateManagerAddMovie()
         {
-            //TODO please make sure there is an "exit" option that returns:  "ERROR" :)  tools can be found in consoleGui
+            
+            string name = ConsoleGui.openQuestion("Please give the name of the movie: ");
+            if (name == "exit")
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            int time = ConsoleGui.getInteger("Please give the duration of the movie in minutes: ");
+            
+            Movie newMovie = new Movie(name, TimeSpan.FromMinutes(time));
+            
+            int check = ConsoleGui.multipleChoice(
+                "Do you want to add the movie : " + newMovie.getTitle() + "(" + newMovie.getId() + ")" + " with the duration of " + newMovie.getTime() ,
+                "yyes", "nno");
+            switch (check)
+            {
+                case -1: case 1: currentState = STATE_IS_LOGGED_IN; return;
+                case 0: movieList.Add(newMovie.getId(), newMovie); break;
+            }
+
+            Console.Out.WriteLine("Current Movies : \n");
+            ConsoleGui.list(movieList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+
         }
 
         public static void stateManagerRemoveMovie()
         {
-            //TODO write stateManagerRemoveMovie()
-            Console.Out.WriteLine("stateManagerRemoveMovie");
+            Movie movie = (Movie)ConsoleGui.getElementByMultipleChoice("Which movie would you like to remove?", movieList);
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            if (ans == 0 && movie != null)
+            {
+                if (movie.getTitle() != "None")
+                {
+                    theaterList.Remove(movie.getId());
+                }
+            }
+            else
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            
+            ConsoleGui.list(movieList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+        }
+
+        public static void stateManagerEditMovie()
+        {
+            if (movieList.Count() == 0)
+            {
+                Console.Out.WriteLine("There are no movies yet! So we redirected you to the movies add!");
+                currentState = STATE_MANAGER_ADD_MOVIE;
+            } else {
+                Movie movie = (Movie)ConsoleGui.getElementByMultipleChoice("Which movie would you like to edit?", movieList);
+                Movie oldMovie = movie;
+                Boolean edit = true;
+                while (edit)
+                {
+                    string name = ConsoleGui.openQuestion("Please give the name of the movie (" + movie.getTitle() + "): ");
+                    if (name == "exit")
+                    {
+                        currentState = STATE_IS_LOGGED_IN;
+                        return;
+                    }
+                    if (!(name == null || name == ""))
+                    {
+                        movie.setTitle(name);
+                    }
+
+                    int time = ConsoleGui.getInteger("Please give the duration of the movie in minutes: ");
+                    if (!(time == null))
+                    {
+                        movie.setTime(TimeSpan.FromMinutes(time));
+                    }
+                    if (ConsoleGui.multipleChoice(
+                        "Do you want to add the movie : " + movie.getTitle() + "(" + movie.getId() + ")" + " with the duration of " + movie.getTime() ,
+                        "yyes", "nno") == 0)
+                    {
+                        edit = false;
+                        Console.Out.WriteLine("Movie edited");
+                        ConsoleGui.list(movieList);
+                    }
+                    else
+                    {
+                        movie = oldMovie;
+                        Console.Out.WriteLine("Aborted");
+                    }
+                }
+                currentState = STATE_IS_LOGGED_IN;
+            }
+            return;
         }
 
         public static void stateManagerAddTheater()
@@ -417,6 +515,7 @@ namespace project_bioscooop
         public static void stateManagerRemoveTheater()
         {
             // Console.Out.WriteLine("theaterlist type: " + typeof(theaterList));
+
             Theater theater = (Theater)ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
             int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
             if (ans == 0 && theater != null)
@@ -511,26 +610,63 @@ namespace project_bioscooop
             public int price;
         } 
 
-        public class Movie
+        public class Movie : ConsoleGui.Element
         {
+            private readonly int id;
             private string title;
-            private DateTime time;
+            private TimeSpan time;
             //private int price; removed because theaters have prices movies don't?
+            
+            private static int movieIdCount = -1;
+
+            public string getId()
+            {
+                return id.ToString();
+            }
+
+            public void setTitle(string title)
+            {
+                this.title = title;
+            }
 
             public string getTitle()
             {
                 return title;
             }
 
-            public Movie(string inp_title, DateTime inp_dateTime)
+            public string getTime()
             {
-                title = inp_title;
-                time = inp_dateTime;
+                return new DateTime(time.Ticks).ToString("HH:mm");
             }
-            
+
+            public void setTime(TimeSpan time)
+            {
+                this.time = time;
+            }
+
+            public Movie(string inp_title, TimeSpan inp_timeSpan)
+            {
+                movieIdCount++;
+                id = movieIdCount;
+                
+                title = inp_title;
+                time = inp_timeSpan;
+            }
+
             public static Movie getNoneMovie()
             {
-                return new Movie("None", new DateTime(2240,8,7,6,5,4));
+                return new Movie("None", new TimeSpan(90));
+            }
+            
+            // abstract methods
+            public override void list()
+            {
+                Console.Out.WriteLine(" Id: " + getId() + " movie: " + getTitle());
+            }
+
+            public override string getMPQListing()
+            {
+                return (" Id: " + getId() + " movie: " + getTitle() + " duration: " + getTime());
             }
         }
         
@@ -921,12 +1057,11 @@ namespace project_bioscooop
             {
                 return getElementByMultipleChoice(question, inputArray.ToList());
             }
-            
         }
 
         public static class Generator
         {
-            public static void generateMovieData(int amountOfDataEntries, Dictionary<int, Movie> inp_movieDict)
+            public static void generateMovieData(int amountOfDataEntries, Dictionary<string, ConsoleGui.Element> inp_movieDict)
             {
                 // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
             }
