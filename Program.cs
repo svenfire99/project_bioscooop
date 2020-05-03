@@ -35,7 +35,6 @@ namespace project_bioscooop
         private const int STATE_MANAGER_REMOVE_THEATER = 15;
         
         private const int STATE_MANAGER_MANAGE_THEATER = 16;
-        // private const int STATE_MANAGER_MANAGE_TIME_SLOT = 17;
         
         
         
@@ -104,6 +103,9 @@ namespace project_bioscooop
                     case STATE_MANAGER_REMOVE_THEATER:
                         stateManagerRemoveTheater();
                         break;
+                    case STATE_MANAGER_MANAGE_THEATER:
+                        stateManagerManageTheater();
+                        break;
                 }
             }
         }
@@ -121,8 +123,10 @@ namespace project_bioscooop
             theaterList.Add(testTheater.getId(), testTheater);
             theaterList.Add(testTheater2.getId(), testTheater2);
             
+            movieList.Add("-1", Movie.getNoneMovie());
             movieList.Add("0", new Movie("forzen 5", new TimeSpan(4,20, 69)));
             movieList.Add("1", new Movie("frozen 6", new TimeSpan(4,20, 69)));
+            
             
             
         }
@@ -279,7 +283,7 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for Admin menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater"))
+                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater", "6manage theater"))
                     {
                         case -1:
                             activeUser = null;
@@ -304,6 +308,10 @@ namespace project_bioscooop
                         
                         case 4:
                             currentState = STATE_MANAGER_REMOVE_THEATER;
+                            break;
+                        
+                        case 5:
+                            currentState = STATE_MANAGER_MANAGE_THEATER;
                             break;
                         
                     }
@@ -407,7 +415,10 @@ namespace project_bioscooop
             Movie movie = (Movie)ConsoleGui.getElementByMultipleChoice("Which movie would you like to remove?", movieList);
             if (ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno") == 0)
             {
-                theaterList.Remove(movie.getId());
+                if (movie.getTitle() != "None")
+                {
+                    theaterList.Remove(movie.getId());
+                }
             }
             
             ConsoleGui.list(movieList);
@@ -543,7 +554,14 @@ namespace project_bioscooop
                 Theater.TimeSlot[] timeSlots = theater.GetTimeSlots();
                 Theater.TimeSlot timeSlot = (Theater.TimeSlot)ConsoleGui.getElementByMultipleChoice("which timeslot do you want to manage?", timeSlots);
                 if(timeSlot != null){
-                    MangageTimeSlot(timeSlot);
+                    Movie newMovie = (Movie) ConsoleGui.getElementByMultipleChoice("What movie should be set to this theater? ", movieList);
+                    if (newMovie != null)
+                    {
+                        timeSlot.setMovie(newMovie);
+                        // recursively call stateManagerManageTheater() for smoother operation
+                        // while managing multiple timeslots
+                        stateManagerManageTheater();
+                    }
                 }
             } 
             //if no theater or timeslot is chosen, go back to logged in menu
@@ -552,16 +570,7 @@ namespace project_bioscooop
             
         }
 
-        public static void MangageTimeSlot(Theater.TimeSlot timeSlot)
-        {
-            //add film remove film
-            
-            // remove film
-        }
-        
-        
-        
-        
+       
 
         //classes
         public class Account : ConsoleGui.Element
