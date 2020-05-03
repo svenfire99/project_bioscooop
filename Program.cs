@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
@@ -13,12 +13,10 @@ namespace project_bioscooop
     internal class Program
     {
         private static int permission = 0;
-
-        private static Dictionary<int, Movie> movieList = new Dictionary<int, Movie>();
-        private static Dictionary<int, Ticket> ticketList = new Dictionary<int, Ticket>();
-
-        private static Dictionary<string, ConsoleGui.Element>
-            accountList = new Dictionary<string, ConsoleGui.Element>();
+        
+        public static Dictionary<string, ConsoleGui.Element> movieList = new Dictionary<string, ConsoleGui.Element>();
+        private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
+        private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
 
         public static Dictionary<string, ConsoleGui.Element> theaterList = new Dictionary<string, ConsoleGui.Element>();
 
@@ -32,12 +30,13 @@ namespace project_bioscooop
 
         private const int STATE_MANAGER_ADD_MOVIE = 11;
         private const int STATE_MANAGER_REMOVE_MOVIE = 12;
-        private const int STATE_MANAGER_ADD_THEATER = 13;
-        private const int STATE_MANAGER_REMOVE_THEATER = 14;
-
-
+        private const int STATE_MANAGER_EDIT_MOVIE = 13;
+        
+        private const int STATE_MANAGER_ADD_THEATER = 14;
+        private const int STATE_MANAGER_REMOVE_THEATER = 15;
+        private const int STATE_MANAGER_MANAGE_THEATER = 16;
+        
         private const int STATE_CATERER_ADD_MENU = 20;
-        private const int STATE_CATERER_CHANGE_MENU = 21;
         private const int STATE_CATERER_REMOVE_MENU = 22;
 
 
@@ -50,6 +49,69 @@ namespace project_bioscooop
             //setup
             setup();
 
+            //main loop
+            while (currentState != STATE_EXIT)
+            {
+
+                switch (currentState)
+                {
+                    case STATE_MAIN:
+                        stateMain();
+                        break;
+                    case STATE_CREATE_ACCOUNT:
+                        stateCreateAccount();
+                        break;
+                    case STATE_IS_LOGGED_IN:
+                        stateLoggedIn();
+                        break;
+                    case STATE_MANAGER_ADD_MOVIE:
+                        stateManagerAddMovie();
+                        break;
+                    case STATE_MANAGER_REMOVE_MOVIE:
+                        stateManagerRemoveMovie();
+                        break;
+                    case STATE_MANAGER_EDIT_MOVIE:
+                        stateManagerEditMovie();
+                        break;
+                    case STATE_LOG_IN:
+                        stateLogin();
+                        break;
+                    case STATE_MANAGER_ADD_THEATER:
+                        stateManagerAddTheater();
+                        break;
+                    case STATE_MANAGER_REMOVE_THEATER:
+                        stateManagerRemoveTheater();
+                        break;
+                    case STATE_CATERER_ADD_MENU:
+                        stateCatererAddMenu();
+                        break;
+                    case STATE_CATERER_REMOVE_MENU:
+                        stateCatererRemoveMenu();
+                        break;
+                    case STATE_MANAGER_MANAGE_THEATER:
+                        stateManagerManageTheater();
+                        break;
+                }
+            }
+        }
+
+        //everything to start the program
+        public static void setup()
+        {
+            //create admin account
+            accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
+            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            // Generator.generateMovieData(100, movieList);
+
+            Theater testTheater = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
+            Theater testTheater2 = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
+            theaterList.Add(testTheater.getId(), testTheater);
+            theaterList.Add(testTheater2.getId(), testTheater2);
+            
+            movieList.Add("-1", Movie.getNoneMovie());
+            movieList.Add("0", new Movie("forzen 5", new TimeSpan(4,20, 69)));
+            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4,20, 69)));
+            
             // When application starts system makes new folder structure with a .json file in it
             string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
             DirectoryInfo di = Directory.CreateDirectory(path);
@@ -67,61 +129,9 @@ namespace project_bioscooop
                     Console.WriteLine("File created!");
                 }
             }
-
-            //main loop
-            while (currentState != STATE_EXIT)
-            {
-                switch (currentState)
-                {
-                    case STATE_MAIN:
-                        stateMain();
-                        break;
-                    case STATE_CREATE_ACCOUNT:
-                        stateCreateAccount();
-                        break;
-                    case STATE_IS_LOGGED_IN:
-                        stateLoggedIn();
-                        break;
-                    case STATE_MANAGER_ADD_MOVIE:
-                        stateManagerAddMovie();
-                        break;
-                    case STATE_LOG_IN:
-                        stateLogin();
-                        break;
-                    case STATE_MANAGER_ADD_THEATER:
-                        stateManagerAddTheater();
-                        break;
-                    case STATE_MANAGER_REMOVE_THEATER:
-                        stateManagerRemoveTheater();
-                        break;
-                    case STATE_CATERER_ADD_MENU:
-                        stateCatererAddMenu();
-                        break;
-                    case STATE_CATERER_CHANGE_MENU:
-                        stateCatererChangeMenu();
-                        break;
-                    case STATE_CATERER_REMOVE_MENU:
-                        stateCatererRemoveMenu();
-                        break;
-                }
-            }
+            
         }
-
-        //everything to start the program
-        public static void setup()
-        {
-            //create admin account
-            accountList.Add("admin", new Account("admin", "admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer",
-                new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
-            Generator.generateMovieData(100, movieList);
-
-            Theater testTheater = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
-            Theater testTheater2 = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
-            theaterList.Add(testTheater.getId(), testTheater);
-            theaterList.Add(testTheater2.getId(), testTheater2);
-        }
-
+        
         //states
         public static void stateMain()
         {
@@ -129,10 +139,13 @@ namespace project_bioscooop
                 "ccreate account");
             switch (choice)
             {
-                case 0:
+                case -1:
+                    currentState = STATE_EXIT;
+                    break;
+                case 0: 
                     currentState = STATE_LOG_IN;
                     break;
-
+                
                 case 1:
                     currentState = STATE_CREATE_ACCOUNT;
                     break;
@@ -147,14 +160,14 @@ namespace project_bioscooop
             while (creating)
             {
                 string name = ConsoleGui.openQuestion("Lets begin with your name!");
-
+                
                 //exit strategy
                 if (name.Equals("exit"))
                 {
                     currentState = STATE_MAIN;
                     return;
                 }
-
+                
                 //get values
                 string password = ConsoleGui.openQuestion("Now an easy to remember, hard to guess password:");
                 string email = ConsoleGui.openQuestion("Great! on which email-adress can we reach you?",
@@ -224,9 +237,9 @@ namespace project_bioscooop
             {
                 if (role == Account.ROLE_CATERING)
                 {
-                    //TODO(Ali) add switch case for catering menu
+                    //TODO(Ahmet) add switch case for catering menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "llist food items ", "aadd food items", "nNieuwAliItem"))
+                        "lList food items ", "aAdd food items", "rRemove FoodItem"))
                     {
                         case -1:
                             activeUser = null;
@@ -237,10 +250,6 @@ namespace project_bioscooop
                             currentState = STATE_CATERER_ADD_MENU;
                             break;
                         case 1:
-                            activeUser = null;
-                            currentState = STATE_CATERER_CHANGE_MENU;
-                            break;
-                        case 2:
                             activeUser = null;
                             currentState = STATE_CATERER_REMOVE_MENU;
                             break;
@@ -282,7 +291,7 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for Admin menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "1add movie", "2remove movie", "3add theater", "4remove theater"))
+                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater", "6manage theater"))
                     {
                         case -1:
                             activeUser = null;
@@ -298,12 +307,21 @@ namespace project_bioscooop
                             break;
 
                         case 2:
+                            currentState = STATE_MANAGER_EDIT_MOVIE;
+                            break;
+                        
+                        case 3:
                             currentState = STATE_MANAGER_ADD_THEATER;
                             break;
-
-                        case 3:
+                        
+                        case 4:
                             currentState = STATE_MANAGER_REMOVE_THEATER;
                             break;
+                        
+                        case 5:
+                            currentState = STATE_MANAGER_MANAGE_THEATER;
+                            break;
+                        
                     }
                 }
                 else
@@ -371,13 +389,100 @@ namespace project_bioscooop
 
         public static void stateManagerAddMovie()
         {
-            //TODO please make sure there is an "exit" option that returns:  "ERROR" :)  tools can be found in consoleGui
+            
+            string name = ConsoleGui.openQuestion("Please give the name of the movie: ");
+            if (name == "exit")
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            int time = ConsoleGui.getInteger("Please give the duration of the movie in minutes: ");
+            
+            Movie newMovie = new Movie(name, TimeSpan.FromMinutes(time));
+            
+            int check = ConsoleGui.multipleChoice(
+                "Do you want to add the movie : " + newMovie.getTitle() + "(" + newMovie.getId() + ")" + " with the duration of " + newMovie.getTime() ,
+                "yyes", "nno");
+            switch (check)
+            {
+                case -1: case 1: currentState = STATE_IS_LOGGED_IN; return;
+                case 0: movieList.Add(newMovie.getId(), newMovie); break;
+            }
+
+            Console.Out.WriteLine("Current Movies : \n");
+            ConsoleGui.list(movieList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+
         }
 
         public static void stateManagerRemoveMovie()
         {
-            //TODO write stateManagerRemoveMovie()
-            Console.Out.WriteLine("stateManagerRemoveMovie");
+            Movie movie = (Movie)ConsoleGui.getElementByMultipleChoice("Which movie would you like to remove?", movieList);
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            if (ans == 0 && movie != null)
+            {
+                if (movie.getTitle() != "None")
+                {
+                    theaterList.Remove(movie.getId());
+                }
+            }
+            else
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            
+            ConsoleGui.list(movieList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+        }
+
+        public static void stateManagerEditMovie()
+        {
+            if (movieList.Count() == 0)
+            {
+                Console.Out.WriteLine("There are no movies yet! So we redirected you to the movies add!");
+                currentState = STATE_MANAGER_ADD_MOVIE;
+            } else {
+                Movie movie = (Movie)ConsoleGui.getElementByMultipleChoice("Which movie would you like to edit?", movieList);
+                Movie oldMovie = movie;
+                Boolean edit = true;
+                while (edit)
+                {
+                    string name = ConsoleGui.openQuestion("Please give the name of the movie (" + movie.getTitle() + "): ");
+                    if (name == "exit")
+                    {
+                        currentState = STATE_IS_LOGGED_IN;
+                        return;
+                    }
+                    if (!(name == null || name == ""))
+                    {
+                        movie.setTitle(name);
+                    }
+
+                    int time = ConsoleGui.getInteger("Please give the duration of the movie in minutes: ");
+                    if (!(time == null))
+                    {
+                        movie.setTime(TimeSpan.FromMinutes(time));
+                    }
+                    if (ConsoleGui.multipleChoice(
+                        "Do you want to add the movie : " + movie.getTitle() + "(" + movie.getId() + ")" + " with the duration of " + movie.getTime() ,
+                        "yyes", "nno") == 0)
+                    {
+                        edit = false;
+                        Console.Out.WriteLine("Movie edited");
+                        ConsoleGui.list(movieList);
+                    }
+                    else
+                    {
+                        movie = oldMovie;
+                        Console.Out.WriteLine("Aborted");
+                    }
+                }
+                currentState = STATE_IS_LOGGED_IN;
+            }
+            return;
         }
 
         public static void stateManagerAddTheater()
@@ -446,8 +551,8 @@ namespace project_bioscooop
         public static void stateManagerRemoveTheater()
         {
             // Console.Out.WriteLine("theaterlist type: " + typeof(theaterList));
-            Theater theater =
-                (Theater) ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
+
+            Theater theater = (Theater)ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
             int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
             if (ans == 0 && theater != null)
             {
@@ -463,6 +568,30 @@ namespace project_bioscooop
             return;
         }
 
+        public static void stateManagerManageTheater()
+        {
+            // choose theater to manage
+            Theater theater = (Theater)ConsoleGui.getElementByMultipleChoice("Which theater would you manage", theaterList);
+            if (theater != null)
+            {
+                Theater.TimeSlot[] timeSlots = theater.GetTimeSlots();
+                Theater.TimeSlot timeSlot = (Theater.TimeSlot)ConsoleGui.getElementByMultipleChoice("which timeslot do you want to manage?", timeSlots);
+                if(timeSlot != null){
+                    Movie newMovie = (Movie) ConsoleGui.getElementByMultipleChoice("What movie should be set to this theater? ", movieList);
+                    if (newMovie != null)
+                    {
+                        timeSlot.setMovie(newMovie);
+                        // recursively call stateManagerManageTheater() for smoother operation
+                        // while managing multiple timeslots
+                        stateManagerManageTheater();
+                    }
+                }
+            } 
+            //if no theater or timeslot is chosen, go back to logged in menu
+            currentState = STATE_IS_LOGGED_IN;
+            
+            
+        }
 
         //classes
         public class Account : ConsoleGui.Element
@@ -539,28 +668,75 @@ namespace project_bioscooop
             public readonly Movie movie;
             public int price;
         }
+            
+            public void list()
+            {
+                throw new NotImplementedException();
+            }
 
-        public class Movie
+            public string getMPQListing()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public class Movie : ConsoleGui.Element
         {
+            private readonly int id;
             private string title;
-
-            private DateTime time;
+            private TimeSpan time;
             //private int price; removed because theaters have prices movies don't?
+            
+            private static int movieIdCount = -1;
+
+            public string getId()
+            {
+                return id.ToString();
+            }
+
+            public void setTitle(string title)
+            {
+                this.title = title;
+            }
 
             public string getTitle()
             {
                 return title;
             }
 
-            public Movie(string inp_title, DateTime inp_dateTime)
+            public string getTime()
             {
+                return new DateTime(time.Ticks).ToString("HH:mm");
+            }
+
+            public void setTime(TimeSpan time)
+            {
+                this.time = time;
+            }
+
+            public Movie(string inp_title, TimeSpan inp_timeSpan)
+            {
+                movieIdCount++;
+                id = movieIdCount;
+                
                 title = inp_title;
-                time = inp_dateTime;
+                time = inp_timeSpan;
             }
 
             public static Movie getNoneMovie()
             {
-                return new Movie("None", new DateTime(2240, 8, 7, 6, 5, 4));
+                return new Movie("None", new TimeSpan(90));
+            }
+            
+            // abstract methods
+            public override void list()
+            {
+                Console.Out.WriteLine(" Id: " + getId() + " movie: " + getTitle());
+            }
+
+            public override string getMPQListing()
+            {
+                return (" Id: " + getId() + " movie: " + getTitle() + " duration: " + getTime());
             }
         }
 
@@ -569,6 +745,8 @@ namespace project_bioscooop
             private readonly string theaterId;
             private readonly int amountOfSeats;
             private SeatGroup[] seatGroups;
+            private TimeSlot[] timeSlots;
+
             private Movie currentMovie;
 
             private static int idCount = -1;
@@ -577,14 +755,12 @@ namespace project_bioscooop
             // abstract methods
             public override void list()
             {
-                Console.Out.WriteLine(" Id: " + theaterId + " running: " + currentMovie.getTitle());
+                Console.Out.WriteLine(getMPQListing());
             }
 
             public override string getMPQListing()
             {
-                return (" Id: " + theaterId + " running: " + currentMovie.getTitle() + " seats available: " +
-                        getAvailableSeats() +
-                        " of " + amountOfSeats);
+                return (" Id: " + theaterId + " available amount of timeslots: " + getAmountOfavailableTimeslots());
             }
 
 
@@ -611,21 +787,6 @@ namespace project_bioscooop
                 return output;
             }
 
-            public void setCurrentMovie()
-            {
-                //TODO add method for setting the movie runnning in theater
-            }
-
-            public Movie getCurrentMovie()
-            {
-                return currentMovie;
-            }
-
-            public void removeCurrentMovie()
-            {
-                //TODO add method to remove current movie
-            }
-
             public string getId()
             {
                 return theaterId;
@@ -635,8 +796,28 @@ namespace project_bioscooop
             {
                 return amountOfSeats;
             }
+            
+            // returns amount of available timeslots
+            public int getAmountOfavailableTimeslots()
+            {
+                int output = 0;
+                foreach (TimeSlot timeSlot in timeSlots)
+                {
+                    if (timeSlot.getMovie().getTitle().Equals("None"))
+                    {
+                        output++;
+                    }
+                }
 
+                return output;
+            }
 
+            
+            public TimeSlot[] GetTimeSlots()
+            {
+                return timeSlots;
+            }
+            
             // constructor
             public Theater(params SeatGroup[] inp_seatGroups)
             {
@@ -653,6 +834,14 @@ namespace project_bioscooop
 
                 // theater will have a 'none' movie by default
                 currentMovie = Movie.getNoneMovie();
+
+                // initialize timeslots
+                timeSlots = new[]
+                {
+                    new TimeSlot(new TimeSpan(19,0,0), new TimeSpan(20,0,0), inp_seatGroups),
+                    new TimeSlot(new TimeSpan(20,0,0), new TimeSpan(21,0,0), inp_seatGroups),
+                    new TimeSlot(new TimeSpan(21,0,0), new TimeSpan(22,0,0), inp_seatGroups),
+                };
             }
 
             //data holder for SeatGroup seats and prices
@@ -699,6 +888,47 @@ namespace project_bioscooop
                     return description;
                 }
             }
+
+            public class TimeSlot : ConsoleGui.Element
+            {
+                private Movie runningMovie = Movie.getNoneMovie();
+                private TimeSpan begin;
+                private TimeSpan end;
+                private SeatGroup[] seatgroups;    
+                
+                
+                public override void list()
+                {
+                    Console.Out.WriteLine(getMPQListing());
+                }
+
+                public override string getMPQListing()
+                {
+                    return "from: " + begin + " to: " + end + " Currently runs: " + runningMovie.getTitle();
+                }
+
+                public Movie getMovie()
+                {
+                    return runningMovie;
+                }
+
+                public void setMovie(Movie inp_movie)
+                {
+                    runningMovie = inp_movie;
+                }
+
+                public TimeSlot(TimeSpan inp_begin, TimeSpan inp_end, SeatGroup[] inp_seatgroups)
+                {
+                    begin = inp_begin;
+                    end = inp_end;
+                    runningMovie = Movie.getNoneMovie();
+                    seatgroups = inp_seatgroups;
+                }
+                
+                
+                
+            }
+            
         }
 
 
@@ -779,8 +1009,7 @@ namespace project_bioscooop
             }
 
 
-            //TODO change multipleChoice to accept numbers as first input by taking a substring until first non numeral char
-
+           
             public static int multipleChoice(string question, params string[] options)
             {
                 Console.Out.WriteLine("\n" + question);
@@ -948,17 +1177,16 @@ namespace project_bioscooop
             }
         }
 
-        public static class Generator
-        {
-            public static void generateMovieData(int amountOfDataEntries, Dictionary<int, Movie> inp_movieDict)
-            {
-                // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
-            }
-
-            public static void generateUserData(int amountOfDataEntries, Dictionary<string, Account> inp_userDict)
-            {
-                // code to generate 'amountOfDataEntries' x random user and add them to inp_userDict
-            }
-        }
+        // public static class Generator
+        // {
+        //     public static void generateMovieData(int amountOfDataEntries, Dictionary<string, ConsoleGui.Element> inp_movieDict)
+        //     {
+        //         // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
+        //     }
+        //
+        //     public static void generateUserData(int amountOfDataEntries, Dictionary<string, Account> inp_userDict)
+        //     {
+        //         // code to generate 'amountOfDataEntries' x random user and add them to inp_userDict
+        //     }
+        // }
     }
-}
