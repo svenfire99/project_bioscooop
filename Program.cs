@@ -13,9 +13,11 @@ namespace project_bioscooop
     internal class Program
     {
         private static int permission = 0;
-        
+
         public static Dictionary<string, ConsoleGui.Element> movieList = new Dictionary<string, ConsoleGui.Element>();
-        private static Dictionary<int, Ticket> ticketList = new Dictionary<int,Ticket>();
+        
+        private static Dictionary<int, Ticket> ticketList = new Dictionary<int, Ticket>();
+
         private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
 
         public static Dictionary<string, ConsoleGui.Element> theaterList = new Dictionary<string, ConsoleGui.Element>();
@@ -31,11 +33,11 @@ namespace project_bioscooop
         private const int STATE_MANAGER_ADD_MOVIE = 11;
         private const int STATE_MANAGER_REMOVE_MOVIE = 12;
         private const int STATE_MANAGER_EDIT_MOVIE = 13;
-        
+
         private const int STATE_MANAGER_ADD_THEATER = 14;
         private const int STATE_MANAGER_REMOVE_THEATER = 15;
         private const int STATE_MANAGER_MANAGE_THEATER = 16;
-        
+
         private const int STATE_CATERER_ADD_MENU = 20;
         private const int STATE_CATERER_REMOVE_MENU = 22;
 
@@ -52,7 +54,6 @@ namespace project_bioscooop
             //main loop
             while (currentState != STATE_EXIT)
             {
-
                 switch (currentState)
                 {
                     case STATE_MAIN:
@@ -83,7 +84,7 @@ namespace project_bioscooop
                         stateManagerRemoveTheater();
                         break;
                     case STATE_CATERER_ADD_MENU:
-                        stateCatererAddMenu();
+                        StateCatererAddMenu();
                         break;
                     case STATE_CATERER_REMOVE_MENU:
                         stateCatererRemoveMenu();
@@ -99,7 +100,7 @@ namespace project_bioscooop
         public static void setup()
         {
             //create admin account
-            accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
+            accountList.Add("admin", new Account("admin", "admin", 420, "admin", Account.ROLE_ADMIN));
             accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
             // Generator.generateMovieData(100, movieList);
 
@@ -107,10 +108,14 @@ namespace project_bioscooop
             Theater testTheater2 = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
             theaterList.Add(testTheater.getId(), testTheater);
             theaterList.Add(testTheater2.getId(), testTheater2);
-            
+
             movieList.Add("-1", Movie.getNoneMovie());
-            movieList.Add("0", new Movie("forzen 5", new TimeSpan(4,20, 69)));
-            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4,20, 69)));
+            movieList.Add("0", new Movie("frozen 5", new TimeSpan(4, 20, 69)));
+            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4, 20, 69)));
+            
+            menuItem.Add(-1, MenuItem.GetNoneMenuItem());
+            menuItem.Add(0, new MenuItem("Hot Dogs", 5.80));
+            menuItem.Add(1, new MenuItem("Fries", 3.50));
             
             // When application starts system makes new folder structure with a .json file in it
             string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
@@ -129,9 +134,8 @@ namespace project_bioscooop
                     Console.WriteLine("File created!");
                 }
             }
-            
         }
-        
+
         //states
         public static void stateMain()
         {
@@ -142,10 +146,10 @@ namespace project_bioscooop
                 case -1:
                     currentState = STATE_EXIT;
                     break;
-                case 0: 
+                case 0:
                     currentState = STATE_LOG_IN;
                     break;
-                
+
                 case 1:
                     currentState = STATE_CREATE_ACCOUNT;
                     break;
@@ -160,14 +164,14 @@ namespace project_bioscooop
             while (creating)
             {
                 string name = ConsoleGui.openQuestion("Lets begin with your name!");
-                
+
                 //exit strategy
                 if (name.Equals("exit"))
                 {
                     currentState = STATE_MAIN;
                     return;
                 }
-                
+
                 //get values
                 string password = ConsoleGui.openQuestion("Now an easy to remember, hard to guess password:");
                 string email = ConsoleGui.openQuestion("Great! on which email-adress can we reach you?",
@@ -237,7 +241,6 @@ namespace project_bioscooop
             {
                 if (role == Account.ROLE_CATERING)
                 {
-                    //TODO(Ahmet) add switch case for catering menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
                         "lList food items ", "aAdd food items", "rRemove FoodItem"))
                     {
@@ -291,7 +294,8 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for Admin menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater", "6manage theater"))
+                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater",
+                        "6manage theater"))
                     {
                         case -1:
                             activeUser = null;
@@ -309,19 +313,18 @@ namespace project_bioscooop
                         case 2:
                             currentState = STATE_MANAGER_EDIT_MOVIE;
                             break;
-                        
+
                         case 3:
                             currentState = STATE_MANAGER_ADD_THEATER;
                             break;
-                        
+
                         case 4:
                             currentState = STATE_MANAGER_REMOVE_THEATER;
                             break;
-                        
+
                         case 5:
                             currentState = STATE_MANAGER_MANAGE_THEATER;
                             break;
-                        
                     }
                 }
                 else
@@ -348,6 +351,65 @@ namespace project_bioscooop
                     break;
             }
         }
+
+        //TODO WIP Caterer menu add and remove (Ahmet)
+        public static void StateCatererAddMenu()
+        {
+            string name = ConsoleGui.openQuestion("Please give the name of the food item you want to add: ");
+            if (name == "exit")
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+        
+            int price = ConsoleGui.getInteger("Please give the price of the food item: ");
+        
+            MenuItem newFoodItem = new MenuItem(name, price);
+        
+            int check = ConsoleGui.multipleChoice(
+                "Do you want to add the food item : " + newFoodItem.getName() + "(" + newFoodItem.getId() + ")" +
+                " with the price of " + newFoodItem.getPrice(),
+                "yyes", "nno");
+            switch (check)
+            {
+                case -1:
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    return;
+                case 0:
+                    //TODO check on the .Add function why it is not working (Ahmet)
+                    menuItem.Add(newFoodItem.getId(), newFoodItem);
+                    break;
+            }
+        
+            Console.Out.WriteLine("Current food items : \n");
+            ConsoleGui.list(menuItem);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+        }
+        //TODO finish this V (Ahmet)
+        // public static void stateCatererRemoveMenu()
+        // {
+        //     MenuItem menuItem = (MenuItem) ConsoleGui.getElementByMultipleChoice("Which movie would you like to remove?", menuItem);
+        //     int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+        //     if (ans == 0 && menuItem != null)
+        //     {
+        //         if (menuItem.getName() != "None")
+        //         {
+        //             menuItem.Remove(menuItem.getId());
+        //         }
+        //     }
+        //     else
+        //     {
+        //         currentState = STATE_IS_LOGGED_IN;
+        //         return;
+        //     }
+        //
+        //     ConsoleGui.list(menuItem);
+        //     currentState = STATE_IS_LOGGED_IN;
+        //     return;
+        // }
+
 
         public static void stateLogin()
         {
@@ -389,36 +451,42 @@ namespace project_bioscooop
 
         public static void stateManagerAddMovie()
         {
-            
             string name = ConsoleGui.openQuestion("Please give the name of the movie: ");
             if (name == "exit")
             {
                 currentState = STATE_IS_LOGGED_IN;
                 return;
             }
+
             int time = ConsoleGui.getInteger("Please give the duration of the movie in minutes: ");
-            
+
             Movie newMovie = new Movie(name, TimeSpan.FromMinutes(time));
-            
+
             int check = ConsoleGui.multipleChoice(
-                "Do you want to add the movie : " + newMovie.getTitle() + "(" + newMovie.getId() + ")" + " with the duration of " + newMovie.getTime() ,
+                "Do you want to add the movie : " + newMovie.getTitle() + "(" + newMovie.getId() + ")" +
+                " with the duration of " + newMovie.getTime(),
                 "yyes", "nno");
             switch (check)
             {
-                case -1: case 1: currentState = STATE_IS_LOGGED_IN; return;
-                case 0: movieList.Add(newMovie.getId(), newMovie); break;
+                case -1:
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    return;
+                case 0:
+                    movieList.Add(newMovie.getId(), newMovie);
+                    break;
             }
 
             Console.Out.WriteLine("Current Movies : \n");
             ConsoleGui.list(movieList);
             currentState = STATE_IS_LOGGED_IN;
             return;
-
         }
 
         public static void stateManagerRemoveMovie()
         {
-            Movie movie = (Movie)ConsoleGui.getElementByMultipleChoice("Which movie would you like to remove?", movieList);
+            Movie movie =
+                (Movie) ConsoleGui.getElementByMultipleChoice("Which movie would you like to remove?", movieList);
             int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
             if (ans == 0 && movie != null)
             {
@@ -432,7 +500,7 @@ namespace project_bioscooop
                 currentState = STATE_IS_LOGGED_IN;
                 return;
             }
-            
+
             ConsoleGui.list(movieList);
             currentState = STATE_IS_LOGGED_IN;
             return;
@@ -444,18 +512,23 @@ namespace project_bioscooop
             {
                 Console.Out.WriteLine("There are no movies yet! So we redirected you to the movies add!");
                 currentState = STATE_MANAGER_ADD_MOVIE;
-            } else {
-                Movie movie = (Movie)ConsoleGui.getElementByMultipleChoice("Which movie would you like to edit?", movieList);
+            }
+            else
+            {
+                Movie movie =
+                    (Movie) ConsoleGui.getElementByMultipleChoice("Which movie would you like to edit?", movieList);
                 Movie oldMovie = movie;
                 Boolean edit = true;
                 while (edit)
                 {
-                    string name = ConsoleGui.openQuestion("Please give the name of the movie (" + movie.getTitle() + "): ");
+                    string name =
+                        ConsoleGui.openQuestion("Please give the name of the movie (" + movie.getTitle() + "): ");
                     if (name == "exit")
                     {
                         currentState = STATE_IS_LOGGED_IN;
                         return;
                     }
+
                     if (!(name == null || name == ""))
                     {
                         movie.setTitle(name);
@@ -466,8 +539,10 @@ namespace project_bioscooop
                     {
                         movie.setTime(TimeSpan.FromMinutes(time));
                     }
+
                     if (ConsoleGui.multipleChoice(
-                        "Do you want to add the movie : " + movie.getTitle() + "(" + movie.getId() + ")" + " with the duration of " + movie.getTime() ,
+                        "Do you want to add the movie : " + movie.getTitle() + "(" + movie.getId() + ")" +
+                        " with the duration of " + movie.getTime(),
                         "yyes", "nno") == 0)
                     {
                         edit = false;
@@ -480,8 +555,10 @@ namespace project_bioscooop
                         Console.Out.WriteLine("Aborted");
                     }
                 }
+
                 currentState = STATE_IS_LOGGED_IN;
             }
+
             return;
         }
 
@@ -552,7 +629,8 @@ namespace project_bioscooop
         {
             // Console.Out.WriteLine("theaterlist type: " + typeof(theaterList));
 
-            Theater theater = (Theater)ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
+            Theater theater =
+                (Theater) ConsoleGui.getElementByMultipleChoice("Which theater would you like to remove?", theaterList);
             int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
             if (ans == 0 && theater != null)
             {
@@ -571,13 +649,19 @@ namespace project_bioscooop
         public static void stateManagerManageTheater()
         {
             // choose theater to manage
-            Theater theater = (Theater)ConsoleGui.getElementByMultipleChoice("Which theater would you manage", theaterList);
+            Theater theater =
+                (Theater) ConsoleGui.getElementByMultipleChoice("Which theater would you manage", theaterList);
             if (theater != null)
             {
                 Theater.TimeSlot[] timeSlots = theater.GetTimeSlots();
-                Theater.TimeSlot timeSlot = (Theater.TimeSlot)ConsoleGui.getElementByMultipleChoice("which timeslot do you want to manage?", timeSlots);
-                if(timeSlot != null){
-                    Movie newMovie = (Movie) ConsoleGui.getElementByMultipleChoice("What movie should be set to this theater? ", movieList);
+                Theater.TimeSlot timeSlot =
+                    (Theater.TimeSlot) ConsoleGui.getElementByMultipleChoice("which timeslot do you want to manage?",
+                        timeSlots);
+                if (timeSlot != null)
+                {
+                    Movie newMovie =
+                        (Movie) ConsoleGui.getElementByMultipleChoice("What movie should be set to this theater? ",
+                            movieList);
                     if (newMovie != null)
                     {
                         timeSlot.setMovie(newMovie);
@@ -586,11 +670,10 @@ namespace project_bioscooop
                         stateManagerManageTheater();
                     }
                 }
-            } 
+            }
+
             //if no theater or timeslot is chosen, go back to logged in menu
             currentState = STATE_IS_LOGGED_IN;
-            
-            
         }
 
         //classes
@@ -668,91 +751,295 @@ namespace project_bioscooop
             public readonly Movie movie;
             public int price;
         }
-            
-            public void list()
+
+        public void list()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string getMPQListing()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class MenuItem : ConsoleGui.Element
+    {
+        private readonly int id;
+        private string name;
+        private double price;
+
+        private static int menuItemIdCount = -1;
+        private ConsoleGui.Element _elementImplementation;
+
+        public string getId()
+        {
+            return id.ToString();
+        }
+
+        public void setName(string name)
+        {
+            this.name = name;
+        }
+
+        public string getName()
+        {
+            return name;
+        }
+
+        public double getPrice()
+        {
+            return price;
+        }
+
+        public void setPrice(double price)
+        {
+            this.price = price;
+        }
+
+        public MenuItem(string mIname, double mIprice)
+        {
+            menuItemIdCount++;
+            id = menuItemIdCount;
+
+            name = mIname;
+            price = mIprice;
+        }
+
+        public static MenuItem GetNoneMenuItem()
+        {
+            return new MenuItem("None", 00.00);
+        }
+
+        public override void list()
+        {
+            Console.Out.WriteLine("Id: " + getId() + " food item: " + getName());
+        }
+
+        public override string getMPQListing()
+        {
+            return ("Id: " + getId() + " food item: " + getName() + " price: €" + getPrice());
+        }
+    }
+
+    public class Movie : ConsoleGui.Element
+    {
+        private readonly int id;
+        private string title;
+
+        private TimeSpan time;
+        //private int price; removed because theaters have prices movies don't?
+
+        private static int movieIdCount = -1;
+
+        public string getId()
+        {
+            return id.ToString();
+        }
+
+        public void setTitle(string title)
+        {
+            this.title = title;
+        }
+
+        public string getTitle()
+        {
+            return title;
+        }
+
+        public string getTime()
+        {
+            return new DateTime(time.Ticks).ToString("HH:mm");
+        }
+
+        public void setTime(TimeSpan time)
+        {
+            this.time = time;
+        }
+
+        public Movie(string inp_title, TimeSpan inp_timeSpan)
+        {
+            movieIdCount++;
+            id = movieIdCount;
+
+            title = inp_title;
+            time = inp_timeSpan;
+        }
+
+        public static Movie getNoneMovie()
+        {
+            return new Movie("None", new TimeSpan(90));
+        }
+
+        // abstract methods
+        public override void list()
+        {
+            Console.Out.WriteLine(" Id: " + getId() + " movie: " + getTitle());
+        }
+
+        public override string getMPQListing()
+        {
+            return (" Id: " + getId() + " movie: " + getTitle() + " duration: " + getTime());
+        }
+    }
+
+    public class Theater : ConsoleGui.Element
+    {
+        private readonly string theaterId;
+        private readonly int amountOfSeats;
+        private SeatGroup[] seatGroups;
+        private TimeSlot[] timeSlots;
+
+        private Movie currentMovie;
+
+        private static int idCount = -1;
+
+
+        // abstract methods
+        public override void list()
+        {
+            Console.Out.WriteLine(getMPQListing());
+        }
+
+        public override string getMPQListing()
+        {
+            return (" Id: " + theaterId + " available amount of timeslots: " + getAmountOfavailableTimeslots());
+        }
+
+
+        // methods
+        public int getAvailableSeats()
+        {
+            int output = 0;
+            foreach (SeatGroup seatGroup in this.seatGroups)
             {
-                throw new NotImplementedException();
+                output += seatGroup.getAvailableAmountOfSeats();
             }
 
-            public string getMPQListing()
+            return output;
+        }
+
+        public string seatGroupsToString()
+        {
+            string output = "Seatgroups: \n";
+            foreach (var seatGroup in seatGroups)
             {
-                throw new NotImplementedException();
+                output += seatGroup.getDescription() + "\n";
+            }
+
+            return output;
+        }
+
+        public string getId()
+        {
+            return theaterId;
+        }
+
+        public int getAmountOfSeats()
+        {
+            return amountOfSeats;
+        }
+
+        // returns amount of available timeslots
+        public int getAmountOfavailableTimeslots()
+        {
+            int output = 0;
+            foreach (TimeSlot timeSlot in timeSlots)
+            {
+                if (timeSlot.getMovie().getTitle().Equals("None"))
+                {
+                    output++;
+                }
+            }
+
+            return output;
+        }
+
+
+        public TimeSlot[] GetTimeSlots()
+        {
+            return timeSlots;
+        }
+
+        // constructor
+        public Theater(params SeatGroup[] inp_seatGroups)
+        {
+            idCount++;
+            theaterId = idCount.ToString();
+            amountOfSeats = 0;
+            foreach (SeatGroup seatGroup in inp_seatGroups)
+            {
+                amountOfSeats += seatGroup.getAmountOfSeats();
+            }
+
+            //add given seatgroup to instance variables
+            seatGroups = inp_seatGroups;
+
+            // theater will have a 'none' movie by default
+            currentMovie = Movie.getNoneMovie();
+
+            // initialize timeslots
+            timeSlots = new[]
+            {
+                new TimeSlot(new TimeSpan(19, 0, 0), new TimeSpan(20, 0, 0), inp_seatGroups),
+                new TimeSlot(new TimeSpan(20, 0, 0), new TimeSpan(21, 0, 0), inp_seatGroups),
+                new TimeSlot(new TimeSpan(21, 0, 0), new TimeSpan(22, 0, 0), inp_seatGroups),
+            };
+        }
+
+        //data holder for SeatGroup seats and prices
+        public class SeatGroup
+        {
+            private int amountOfSeats;
+            private int amountOfAvailableSeats;
+            private int priceOfGroup;
+            private string description;
+
+            public SeatGroup(int inp_amountOfSeats, int inp_priceOfSeats, string inp_description)
+            {
+                amountOfSeats = inp_amountOfSeats;
+                amountOfAvailableSeats = amountOfSeats;
+                priceOfGroup = inp_priceOfSeats;
+                description = inp_description;
+            }
+
+            public void sellTicket()
+            {
+                amountOfAvailableSeats--;
+                //TODO change state to ticketSellingState
+            }
+
+
+            //getters
+            public int getAvailableAmountOfSeats()
+            {
+                return amountOfAvailableSeats;
+            }
+
+            public int getAmountOfSeats()
+            {
+                return amountOfSeats;
+            }
+
+            public int getTicketPrice()
+            {
+                return priceOfGroup;
+            }
+
+            public string getDescription()
+            {
+                return description;
             }
         }
 
-        public class Movie : ConsoleGui.Element
+        public class TimeSlot : ConsoleGui.Element
         {
-            private readonly int id;
-            private string title;
-            private TimeSpan time;
-            //private int price; removed because theaters have prices movies don't?
-            
-            private static int movieIdCount = -1;
-
-            public string getId()
-            {
-                return id.ToString();
-            }
-
-            public void setTitle(string title)
-            {
-                this.title = title;
-            }
-
-            public string getTitle()
-            {
-                return title;
-            }
-
-            public string getTime()
-            {
-                return new DateTime(time.Ticks).ToString("HH:mm");
-            }
-
-            public void setTime(TimeSpan time)
-            {
-                this.time = time;
-            }
-
-            public Movie(string inp_title, TimeSpan inp_timeSpan)
-            {
-                movieIdCount++;
-                id = movieIdCount;
-                
-                title = inp_title;
-                time = inp_timeSpan;
-            }
-
-            public static Movie getNoneMovie()
-            {
-                return new Movie("None", new TimeSpan(90));
-            }
-            
-            // abstract methods
-            public override void list()
-            {
-                Console.Out.WriteLine(" Id: " + getId() + " movie: " + getTitle());
-            }
-
-            public override string getMPQListing()
-            {
-                return (" Id: " + getId() + " movie: " + getTitle() + " duration: " + getTime());
-            }
-        }
-
-        public class Theater : ConsoleGui.Element
-        {
-            private readonly string theaterId;
-            private readonly int amountOfSeats;
-            private SeatGroup[] seatGroups;
-            private TimeSlot[] timeSlots;
-
-            private Movie currentMovie;
-
-            private static int idCount = -1;
+            private Movie runningMovie = Movie.getNoneMovie();
+            private TimeSpan begin;
+            private TimeSpan end;
+            private SeatGroup[] seatgroups;
 
 
-            // abstract methods
             public override void list()
             {
                 Console.Out.WriteLine(getMPQListing());
@@ -760,433 +1047,284 @@ namespace project_bioscooop
 
             public override string getMPQListing()
             {
-                return (" Id: " + theaterId + " available amount of timeslots: " + getAmountOfavailableTimeslots());
+                return "from: " + begin + " to: " + end + " Currently runs: " + runningMovie.getTitle();
             }
 
-
-            // methods
-            public int getAvailableSeats()
+            public Movie getMovie()
             {
-                int output = 0;
-                foreach (SeatGroup seatGroup in this.seatGroups)
-                {
-                    output += seatGroup.getAvailableAmountOfSeats();
-                }
-
-                return output;
+                return runningMovie;
             }
 
-            public string seatGroupsToString()
+            public void setMovie(Movie inp_movie)
             {
-                string output = "Seatgroups: \n";
-                foreach (var seatGroup in seatGroups)
-                {
-                    output += seatGroup.getDescription() + "\n";
-                }
-
-                return output;
+                runningMovie = inp_movie;
             }
 
-            public string getId()
+            public TimeSlot(TimeSpan inp_begin, TimeSpan inp_end, SeatGroup[] inp_seatgroups)
             {
-                return theaterId;
+                begin = inp_begin;
+                end = inp_end;
+                runningMovie = Movie.getNoneMovie();
+                seatgroups = inp_seatgroups;
             }
-
-            public int getAmountOfSeats()
-            {
-                return amountOfSeats;
-            }
-            
-            // returns amount of available timeslots
-            public int getAmountOfavailableTimeslots()
-            {
-                int output = 0;
-                foreach (TimeSlot timeSlot in timeSlots)
-                {
-                    if (timeSlot.getMovie().getTitle().Equals("None"))
-                    {
-                        output++;
-                    }
-                }
-
-                return output;
-            }
-
-            
-            public TimeSlot[] GetTimeSlots()
-            {
-                return timeSlots;
-            }
-            
-            // constructor
-            public Theater(params SeatGroup[] inp_seatGroups)
-            {
-                idCount++;
-                theaterId = idCount.ToString();
-                amountOfSeats = 0;
-                foreach (SeatGroup seatGroup in inp_seatGroups)
-                {
-                    amountOfSeats += seatGroup.getAmountOfSeats();
-                }
-
-                //add given seatgroup to instance variables
-                seatGroups = inp_seatGroups;
-
-                // theater will have a 'none' movie by default
-                currentMovie = Movie.getNoneMovie();
-
-                // initialize timeslots
-                timeSlots = new[]
-                {
-                    new TimeSlot(new TimeSpan(19,0,0), new TimeSpan(20,0,0), inp_seatGroups),
-                    new TimeSlot(new TimeSpan(20,0,0), new TimeSpan(21,0,0), inp_seatGroups),
-                    new TimeSlot(new TimeSpan(21,0,0), new TimeSpan(22,0,0), inp_seatGroups),
-                };
-            }
-
-            //data holder for SeatGroup seats and prices
-            public class SeatGroup
-            {
-                private int amountOfSeats;
-                private int amountOfAvailableSeats;
-                private int priceOfGroup;
-                private string description;
-
-                public SeatGroup(int inp_amountOfSeats, int inp_priceOfSeats, string inp_description)
-                {
-                    amountOfSeats = inp_amountOfSeats;
-                    amountOfAvailableSeats = amountOfSeats;
-                    priceOfGroup = inp_priceOfSeats;
-                    description = inp_description;
-                }
-
-                public void sellTicket()
-                {
-                    amountOfAvailableSeats--;
-                    //TODO change state to ticketSellingState
-                }
-
-
-                //getters
-                public int getAvailableAmountOfSeats()
-                {
-                    return amountOfAvailableSeats;
-                }
-
-                public int getAmountOfSeats()
-                {
-                    return amountOfSeats;
-                }
-
-                public int getTicketPrice()
-                {
-                    return priceOfGroup;
-                }
-
-                public string getDescription()
-                {
-                    return description;
-                }
-            }
-
-            public class TimeSlot : ConsoleGui.Element
-            {
-                private Movie runningMovie = Movie.getNoneMovie();
-                private TimeSpan begin;
-                private TimeSpan end;
-                private SeatGroup[] seatgroups;    
-                
-                
-                public override void list()
-                {
-                    Console.Out.WriteLine(getMPQListing());
-                }
-
-                public override string getMPQListing()
-                {
-                    return "from: " + begin + " to: " + end + " Currently runs: " + runningMovie.getTitle();
-                }
-
-                public Movie getMovie()
-                {
-                    return runningMovie;
-                }
-
-                public void setMovie(Movie inp_movie)
-                {
-                    runningMovie = inp_movie;
-                }
-
-                public TimeSlot(TimeSpan inp_begin, TimeSpan inp_end, SeatGroup[] inp_seatgroups)
-                {
-                    begin = inp_begin;
-                    end = inp_end;
-                    runningMovie = Movie.getNoneMovie();
-                    seatgroups = inp_seatgroups;
-                }
-                
-                
-                
-            }
-            
         }
+    }
 
 
-        //the engine
-        public static class ConsoleGui
+    //the engine
+    public static class ConsoleGui
+    {
+        //method that will create a choice dialog
+        public static string openQuestion(string question, string[]? checks, string? negativeResponse)
         {
-            //method that will create a choice dialog
-            public static string openQuestion(string question, string[]? checks, string? negativeResponse)
-            {
-                string output = "";
+            string output = "";
 
-                //base output: 
-                if (checks == null && negativeResponse == null)
+            //base output: 
+            if (checks == null && negativeResponse == null)
+            {
+                //just returns answer
+                Console.Out.WriteLine("\n" + question + " \ntype exit if you don't know");
+                output = Console.ReadLine();
+                if (output.Equals("exit"))
                 {
-                    //just returns answer
-                    Console.Out.WriteLine("\n" + question + " \ntype exit if you don't know");
+                    return "ERROR";
+                }
+
+                return output;
+            }
+            //go into code that see if the checks are met
+            else
+            {
+                //will keep asking same question until checks are met
+                //will return ERROR when exit is typed
+                Console.Out.WriteLine("\n" + question);
+                Console.Out.WriteLine("(type exit if you don't know)");
+                while (true)
+                {
                     output = Console.ReadLine();
+                    bool satisfactitory = true;
+
+                    //exit if exit command is given
                     if (output.Equals("exit"))
                     {
                         return "ERROR";
                     }
 
-                    return output;
-                }
-                //go into code that see if the checks are met
-                else
-                {
-                    //will keep asking same question until checks are met
-                    //will return ERROR when exit is typed
-                    Console.Out.WriteLine("\n" + question);
-                    Console.Out.WriteLine("(type exit if you don't know)");
-                    while (true)
+                    //loop throught the checks and see if they're met
+                    foreach (string check in checks)
                     {
-                        output = Console.ReadLine();
-                        bool satisfactitory = true;
-
-                        //exit if exit command is given
-                        if (output.Equals("exit"))
+                        if (!output.Contains(check))
                         {
-                            return "ERROR";
-                        }
-
-                        //loop throught the checks and see if they're met
-                        foreach (string check in checks)
-                        {
-                            if (!output.Contains(check))
-                            {
-                                satisfactitory = false;
-                                break;
-                            }
-                        }
-
-                        //act base on the outcome of the checks
-                        if (satisfactitory)
-                        {
-                            return output;
-                        }
-                        else if (negativeResponse != null)
-                        {
-                            Console.Out.WriteLine(negativeResponse);
-                            Console.Out.WriteLine("try again or type exit if you don't know");
-                        }
-                        else
-                        {
-                            Console.Out.WriteLine("that's not right, try again or type exit if you don't know");
+                            satisfactitory = false;
+                            break;
                         }
                     }
-                }
 
-
-                return output;
-            }
-
-            //shorthand way of above method for no checks
-            public static string openQuestion(string question)
-            {
-                return openQuestion(question, null, null);
-            }
-
-
-           
-            public static int multipleChoice(string question, params string[] options)
-            {
-                Console.Out.WriteLine("\n" + question);
-                while (true)
-                {
-                    //list all possible inputs and prepare for answer
-                    string[] possibleInputs = new string[options.Length];
-                    for (int i = 0; i < options.Length; i++)
-                    {
-                        string option = options[i];
-
-                        //count how many numeral chars are in this possible answer to account for inputs beginning with numbers
-                        int lenghtOfExpectedUserInput = 1;
-                        for (int j = 0; j < option.Length; j++)
-                        {
-                            if (!Char.IsDigit(option[j]))
-                            {
-                                break;
-                            }
-                            else if (j + 1 > lenghtOfExpectedUserInput)
-                            {
-                                lenghtOfExpectedUserInput = j + 1;
-                            }
-                        }
-
-                        //distill info
-                        string newAns = option.Substring(0, lenghtOfExpectedUserInput).ToUpper();
-                        string firstChar = option.Substring(lenghtOfExpectedUserInput, 1).ToUpper();
-                        string listOption = "[" + newAns + "]" + " " + firstChar +
-                                            option.Substring(lenghtOfExpectedUserInput + 1);
-
-                        //list option and save possible answer
-                        possibleInputs[i] = newAns;
-                        Console.Out.WriteLine(listOption);
-                    }
-
-                    //add exit for escape
-                    Console.Out.WriteLine("[X] Exit\n");
-                    string ans = Console.ReadLine().ToUpper();
-
-
-                    //get and check answer against possible answers
-                    if (ans.Equals("X"))
-                    {
-                        return -1;
-                    }
-                    else
-                    {
-                        for (int i = 0; i < possibleInputs.Length; i++)
-                        {
-                            if (ans.Equals(possibleInputs[i]))
-                            {
-                                return i;
-                            }
-                        }
-
-                        Console.Out.WriteLine("Thats not an option, type \"X\" if you don't know");
-                    }
-                }
-            }
-
-
-            public static int getInteger(string question)
-            {
-                Console.Out.WriteLine("\n" + question);
-
-
-                while (true)
-                {
-                    string input = Console.ReadLine();
-
-                    //create escape
-                    if (input.Equals("exit"))
-                    {
-                        return int.MinValue;
-                    }
-
-                    if (int.TryParse(input, out int output))
+                    //act base on the outcome of the checks
+                    if (satisfactitory)
                     {
                         return output;
                     }
+                    else if (negativeResponse != null)
+                    {
+                        Console.Out.WriteLine(negativeResponse);
+                        Console.Out.WriteLine("try again or type exit if you don't know");
+                    }
                     else
                     {
-                        Console.Out.WriteLine("That's not a valid aswer, please try again" +
-                                              "\nor type exit to go back");
+                        Console.Out.WriteLine("that's not right, try again or type exit if you don't know");
                     }
                 }
             }
 
-            public static void debugLine(string line)
-            {
-                Console.Out.WriteLine("# DEBUG #" + line);
-            }
 
-            public static bool noErrorsInValue(params string[] values)
+            return output;
+        }
+
+        //shorthand way of above method for no checks
+        public static string openQuestion(string question)
+        {
+            return openQuestion(question, null, null);
+        }
+
+
+        public static int multipleChoice(string question, params string[] options)
+        {
+            Console.Out.WriteLine("\n" + question);
+            while (true)
             {
-                foreach (var value in values)
+                //list all possible inputs and prepare for answer
+                string[] possibleInputs = new string[options.Length];
+                for (int i = 0; i < options.Length; i++)
                 {
-                    if (value.Equals("ERROR") || value.Equals("-1"))
+                    string option = options[i];
+
+                    //count how many numeral chars are in this possible answer to account for inputs beginning with numbers
+                    int lenghtOfExpectedUserInput = 1;
+                    for (int j = 0; j < option.Length; j++)
                     {
-                        return false;
+                        if (!Char.IsDigit(option[j]))
+                        {
+                            break;
+                        }
+                        else if (j + 1 > lenghtOfExpectedUserInput)
+                        {
+                            lenghtOfExpectedUserInput = j + 1;
+                        }
                     }
+
+                    //distill info
+                    string newAns = option.Substring(0, lenghtOfExpectedUserInput).ToUpper();
+                    string firstChar = option.Substring(lenghtOfExpectedUserInput, 1).ToUpper();
+                    string listOption = "[" + newAns + "]" + " " + firstChar +
+                                        option.Substring(lenghtOfExpectedUserInput + 1);
+
+                    //list option and save possible answer
+                    possibleInputs[i] = newAns;
+                    Console.Out.WriteLine(listOption);
                 }
 
-                return true;
-            }
+                //add exit for escape
+                Console.Out.WriteLine("[X] Exit\n");
+                string ans = Console.ReadLine().ToUpper();
 
 
-            public abstract class Element
-            {
-                public abstract void list();
-
-                public abstract string getMPQListing();
-            }
-
-
-            public static void list(IEnumerable iterable)
-            {
-                if (iterable is IDictionary)
+                //get and check answer against possible answers
+                if (ans.Equals("X"))
                 {
-                    IDictionary dict = (IDictionary) iterable;
-                    foreach (Element element in dict.Values)
-                    {
-                        element.list();
-                    }
+                    return -1;
                 }
                 else
                 {
-                    foreach (Element element in (IEnumerable) iterable)
+                    for (int i = 0; i < possibleInputs.Length; i++)
                     {
-                        element.list();
+                        if (ans.Equals(possibleInputs[i]))
+                        {
+                            return i;
+                        }
                     }
+
+                    Console.Out.WriteLine("Thats not an option, type \"X\" if you don't know");
                 }
-            }
-
-            public static Element getElementByMultipleChoice(String question, List<Element> inputList)
-            {
-                // extract possible ans as string from elements
-                string[] elements = new string[inputList.Count];
-                for (int i = 0; i < elements.Length; i++)
-                {
-                    elements[i] = i + inputList[i].getMPQListing();
-                }
-
-                int ans = multipleChoice(question, elements);
-
-                if (ans >= 0)
-                {
-                    return inputList[ans];
-                }
-
-                return null;
-            }
-
-            public static Element
-                getElementByMultipleChoice(String question,
-                    Dictionary<string, Element> inputDict) // was IDictionary inputDict
-            {
-                return getElementByMultipleChoice(question, (inputDict.Values.ToList()));
-            }
-
-            public static Element getElementByMultipleChoice(String question, Element[] inputArray)
-            {
-                return getElementByMultipleChoice(question, inputArray.ToList());
             }
         }
 
-        // public static class Generator
-        // {
-        //     public static void generateMovieData(int amountOfDataEntries, Dictionary<string, ConsoleGui.Element> inp_movieDict)
-        //     {
-        //         // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
-        //     }
-        //
-        //     public static void generateUserData(int amountOfDataEntries, Dictionary<string, Account> inp_userDict)
-        //     {
-        //         // code to generate 'amountOfDataEntries' x random user and add them to inp_userDict
-        //     }
-        // }
+
+        public static int getInteger(string question)
+        {
+            Console.Out.WriteLine("\n" + question);
+
+
+            while (true)
+            {
+                string input = Console.ReadLine();
+
+                //create escape
+                if (input.Equals("exit"))
+                {
+                    return int.MinValue;
+                }
+
+                if (int.TryParse(input, out int output))
+                {
+                    return output;
+                }
+                else
+                {
+                    Console.Out.WriteLine("That's not a valid aswer, please try again" +
+                                          "\nor type exit to go back");
+                }
+            }
+        }
+
+        public static void debugLine(string line)
+        {
+            Console.Out.WriteLine("# DEBUG #" + line);
+        }
+
+        public static bool noErrorsInValue(params string[] values)
+        {
+            foreach (var value in values)
+            {
+                if (value.Equals("ERROR") || value.Equals("-1"))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
+        public abstract class Element
+        {
+            public abstract void list();
+
+            public abstract string getMPQListing();
+        }
+
+
+        public static void list(IEnumerable iterable)
+        {
+            if (iterable is IDictionary)
+            {
+                IDictionary dict = (IDictionary) iterable;
+                foreach (Element element in dict.Values)
+                {
+                    element.list();
+                }
+            }
+            else
+            {
+                foreach (Element element in (IEnumerable) iterable)
+                {
+                    element.list();
+                }
+            }
+        }
+
+        public static Element getElementByMultipleChoice(String question, List<Element> inputList)
+        {
+            // extract possible ans as string from elements
+            string[] elements = new string[inputList.Count];
+            for (int i = 0; i < elements.Length; i++)
+            {
+                elements[i] = i + inputList[i].getMPQListing();
+            }
+
+            int ans = multipleChoice(question, elements);
+
+            if (ans >= 0)
+            {
+                return inputList[ans];
+            }
+
+            return null;
+        }
+
+        public static Element
+            getElementByMultipleChoice(String question,
+                Dictionary<string, Element> inputDict) // was IDictionary inputDict
+        {
+            return getElementByMultipleChoice(question, (inputDict.Values.ToList()));
+        }
+
+        public static Element getElementByMultipleChoice(String question, Element[] inputArray)
+        {
+            return getElementByMultipleChoice(question, inputArray.ToList());
+        }
     }
+
+    // public static class Generator
+    // {
+    //     public static void generateMovieData(int amountOfDataEntries, Dictionary<string, ConsoleGui.Element> inp_movieDict)
+    //     {
+    //         // code to generate 'amountOfDataEntries' x random movie and add them to inp_movieDict
+    //     }
+    //
+    //     public static void generateUserData(int amountOfDataEntries, Dictionary<string, Account> inp_userDict)
+    //     {
+    //         // code to generate 'amountOfDataEntries' x random user and add them to inp_userDict
+    //     }
+    // }
+}
