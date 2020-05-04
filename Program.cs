@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Xml;
 using Microsoft.VisualBasic;
 
 namespace project_bioscooop
@@ -15,14 +16,14 @@ namespace project_bioscooop
         private static int permission = 0;
 
         public static Dictionary<string, ConsoleGui.Element> movieList = new Dictionary<string, ConsoleGui.Element>();
-        
+
         private static Dictionary<int, Ticket> ticketList = new Dictionary<int, Ticket>();
 
         private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
 
         public static Dictionary<string, ConsoleGui.Element> theaterList = new Dictionary<string, ConsoleGui.Element>();
 
-        private static Dictionary<int, ConsoleGui.Element> menuItem = new Dictionary<int, ConsoleGui.Element>();
+        private static Dictionary<string, ConsoleGui.Element> menuItem = new Dictionary<string, ConsoleGui.Element>();
 
         private const int STATE_EXIT = -1;
         private const int STATE_MAIN = 0;
@@ -101,7 +102,8 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin", "admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("caterer",
+                new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
             // Generator.generateMovieData(100, movieList);
 
             Theater testTheater = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
@@ -112,11 +114,11 @@ namespace project_bioscooop
             movieList.Add("-1", Movie.getNoneMovie());
             movieList.Add("0", new Movie("frozen 5", new TimeSpan(4, 20, 69)));
             movieList.Add("1", new Movie("frozen 6", new TimeSpan(4, 20, 69)));
-            
-            menuItem.Add(-1, MenuItem.GetNoneMenuItem());
-            menuItem.Add(0, new MenuItem("Hot Dogs", 5.80));
-            menuItem.Add(1, new MenuItem("Fries", 3.50));
-            
+
+            menuItem.Add("-1", MenuItem.GetNoneMenuItem());
+            menuItem.Add("0", new MenuItem("Hot Dogs", 5.80));
+            menuItem.Add("1", new MenuItem("Fries", 3.50));
+
             // When application starts system makes new folder structure with a .json file in it
             string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
             DirectoryInfo di = Directory.CreateDirectory(path);
@@ -242,7 +244,7 @@ namespace project_bioscooop
                 if (role == Account.ROLE_CATERING)
                 {
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "lList food items ", "aAdd food items", "rRemove FoodItem"))
+                        "aAdd food items", "rRemove FoodItem"))
                     {
                         case -1:
                             activeUser = null;
@@ -361,14 +363,14 @@ namespace project_bioscooop
                 currentState = STATE_IS_LOGGED_IN;
                 return;
             }
-        
+
             int price = ConsoleGui.getInteger("Please give the price of the food item: ");
-        
+
             MenuItem newFoodItem = new MenuItem(name, price);
-        
+
             int check = ConsoleGui.multipleChoice(
                 "Do you want to add the food item : " + newFoodItem.getName() + "(" + newFoodItem.getId() + ")" +
-                " with the price of " + newFoodItem.getPrice(),
+                " with the price of €" + newFoodItem.getPrice(),
                 "yyes", "nno");
             switch (check)
             {
@@ -381,34 +383,36 @@ namespace project_bioscooop
                     menuItem.Add(newFoodItem.getId(), newFoodItem);
                     break;
             }
-        
+
             Console.Out.WriteLine("Current food items : \n");
             ConsoleGui.list(menuItem);
             currentState = STATE_IS_LOGGED_IN;
             return;
         }
+
         //TODO finish this V (Ahmet)
-        // public static void stateCatererRemoveMenu()
-        // {
-        //     MenuItem menuItem = (MenuItem) ConsoleGui.getElementByMultipleChoice("Which movie would you like to remove?", menuItem);
-        //     int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
-        //     if (ans == 0 && menuItem != null)
-        //     {
-        //         if (menuItem.getName() != "None")
-        //         {
-        //             menuItem.Remove(menuItem.getId());
-        //         }
-        //     }
-        //     else
-        //     {
-        //         currentState = STATE_IS_LOGGED_IN;
-        //         return;
-        //     }
-        //
-        //     ConsoleGui.list(menuItem);
-        //     currentState = STATE_IS_LOGGED_IN;
-        //     return;
-        // }
+        public static void stateCatererRemoveMenu()
+        {
+            MenuItem removeFoodItem =
+                (MenuItem) ConsoleGui.getElementByMultipleChoice("Which food item would you like to remove?", menuItem);
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            if (ans == 0 && menuItem != null)
+            {
+                if (removeFoodItem.getName() != "None")
+                {
+                    menuItem.Remove(removeFoodItem.getId());
+                }
+            }
+            else
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+
+            ConsoleGui.list(menuItem);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+        }
 
 
         public static void stateLogin()
@@ -1204,7 +1208,7 @@ namespace project_bioscooop
                         }
                     }
 
-                    Console.Out.WriteLine("Thats not an option, type \"X\" if you don't know");
+                    Console.Out.WriteLine("That's not an option, type \"X\" if you don't know");
                 }
             }
         }
@@ -1231,7 +1235,7 @@ namespace project_bioscooop
                 }
                 else
                 {
-                    Console.Out.WriteLine("That's not a valid aswer, please try again" +
+                    Console.Out.WriteLine("That's not a valid answer, please try again" +
                                           "\nor type exit to go back");
                 }
             }
