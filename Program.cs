@@ -19,7 +19,8 @@ namespace project_bioscooop
 
         private static Dictionary<int, Ticket> ticketList = new Dictionary<int, Ticket>();
 
-        private static Dictionary<string, ConsoleGui.Element> accountList = new Dictionary<string, ConsoleGui.Element>();
+        private static Dictionary<string, ConsoleGui.Element>
+            accountList = new Dictionary<string, ConsoleGui.Element>();
 
         public static Dictionary<string, ConsoleGui.Element> theaterList = new Dictionary<string, ConsoleGui.Element>();
 
@@ -334,10 +335,10 @@ namespace project_bioscooop
                     currentState = STATE_MAIN;
                 }
             };
-            
+
             if (activeUser == null)
             {
-                Console.Out.WriteLine("Active user is: null");    
+                Console.Out.WriteLine("Active user is: null");
             }
 
             switch (activeUser.role)
