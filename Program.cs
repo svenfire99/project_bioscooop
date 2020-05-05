@@ -251,11 +251,9 @@ namespace project_bioscooop
                             currentState = STATE_MAIN;
                             break;
                         case 0:
-                            activeUser = null;
                             currentState = STATE_CATERER_ADD_MENU;
                             break;
                         case 1:
-                            activeUser = null;
                             currentState = STATE_CATERER_REMOVE_MENU;
                             break;
                     }
@@ -336,6 +334,11 @@ namespace project_bioscooop
                     currentState = STATE_MAIN;
                 }
             };
+            
+            if (activeUser == null)
+            {
+                Console.Out.WriteLine("Active user is: null");    
+            }
 
             switch (activeUser.role)
             {
@@ -374,7 +377,6 @@ namespace project_bioscooop
                 "yyes", "nno");
             switch (check)
             {
-                case -1:
                 case 1:
                     currentState = STATE_IS_LOGGED_IN;
                     return;
@@ -822,7 +824,7 @@ namespace project_bioscooop
 
         public override string getMPQListing()
         {
-            return ("Id: " + getId() + " food item: " + getName() + " price: €" + getPrice());
+            return ("Id: " + getId() + " food item: " + getName() + " price: " + getPrice() + " euro");
         }
     }
 
