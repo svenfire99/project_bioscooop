@@ -36,12 +36,15 @@ namespace project_bioscooop
         
         private const int STATE_MANAGER_MANAGE_THEATER = 16;
         
-        
-        
-        
-        
         private const int STATE_CATERER_CHANGE_MENU = 21;
-
+        
+        private const int STATE_CUSTOMER_SHOW_MOVIES = 31;
+        private const int STATE_CUSTOMER_BUY_TICKET_MOVIE = 32;
+        private const int STATE_CUSTOMER_SHOW_CATHERING = 33;
+        private const int STATE_CUSTOMER_ADD_CATHERING_ITEM = 34;
+        private const int STATE_CUSTOMER_SHOW_BASKET = 35;
+        private const int STATE_CUSTOMER_PURCHASE_BASKET = 36;
+        private const int STATE_CUSTOMER_VIEW_PURCHASE = 37;
 
         private static int currentState = 0;
         private static Account activeUser = null;
@@ -82,9 +85,13 @@ namespace project_bioscooop
                     case STATE_CREATE_ACCOUNT:
                         stateCreateAccount();
                         break;
+                    case STATE_LOG_IN:
+                        stateLogin();
+                        break;
                     case STATE_IS_LOGGED_IN:
                         stateLoggedIn();
                         break;
+                    
                     case STATE_MANAGER_ADD_MOVIE:
                         stateManagerAddMovie();
                         break;
@@ -94,9 +101,6 @@ namespace project_bioscooop
                     case STATE_MANAGER_EDIT_MOVIE:
                         stateManagerEditMovie();
                         break;
-                    case STATE_LOG_IN:
-                        stateLogin();
-                        break;
                     case STATE_MANAGER_ADD_THEATER:
                         stateManagerAddTheater();
                         break;
@@ -105,6 +109,13 @@ namespace project_bioscooop
                         break;
                     case STATE_MANAGER_MANAGE_THEATER:
                         stateManagerManageTheater();
+                        break;
+                    
+                    case STATE_CUSTOMER_SHOW_MOVIES:
+                        showMovies();
+                        break;
+                    case STATE_CUSTOMER_BUY_TICKET_MOVIE:
+                        buyTicket();
                         break;
                 }
             }
@@ -116,16 +127,18 @@ namespace project_bioscooop
             //create admin account
             accountList.Add("admin", new Account("admin","admin", 420, "admin", Account.ROLE_ADMIN));
             accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("frontend", new Account("frontend","frontend", 420, "frontend", Account.ROLE_USER));
+            
             Generator.generateMovieData(100, movieList);
-
+            movieList.Add("-1", Movie.getNoneMovie());
+            movieList.Add("0", new Movie("forzen 5", new TimeSpan(4,20, 69)));
+            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4,20, 69)));
+            
             Theater testTheater = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
             Theater testTheater2 = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
             theaterList.Add(testTheater.getId(), testTheater);
             theaterList.Add(testTheater2.getId(), testTheater2);
             
-            movieList.Add("-1", Movie.getNoneMovie());
-            movieList.Add("0", new Movie("forzen 5", new TimeSpan(4,20, 69)));
-            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4,20, 69)));
             
             
             
@@ -217,9 +230,16 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for user menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account"))
+                        "ccheck available movies", "ssee my account","llog out"))
                     {
                         case -1:
+                            activeUser = null;
+                            currentState = STATE_MAIN;
+                            break;
+                        case 0:
+                            currentState = STATE_CUSTOMER_SHOW_MOVIES;
+                            break;
+                        case 2:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
@@ -240,9 +260,13 @@ namespace project_bioscooop
                 {
                     //TODO(Ali) add switch case for catering menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "llist food items ", "aadd food items", "nNieuwAliItem"))
+                        "llist food items ", "aadd food items", "nNieuwAliItem","llog out"))
                     {
                         case -1:
+                            activeUser = null;
+                            currentState = STATE_MAIN;
+                            break;
+                        case 3:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
@@ -263,9 +287,13 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for employee menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account"))
+                        "ccheck available movies", "ssee my account","llog out"))
                     {
                         case -1:
+                            activeUser = null;
+                            currentState = STATE_MAIN;
+                            break;
+                        case 2:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
@@ -286,7 +314,7 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for Admin menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater", "6manage theater"))
+                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater", "6manage theater","llog out"))
                     {
                         case -1:
                             activeUser = null;
@@ -315,6 +343,10 @@ namespace project_bioscooop
                         
                         case 5:
                             currentState = STATE_MANAGER_MANAGE_THEATER;
+                            break;
+                        case 6:
+                            activeUser = null;
+                            currentState = STATE_MAIN;
                             break;
                         
                     }
@@ -575,10 +607,139 @@ namespace project_bioscooop
             } 
             //if no theater or timeslot is chosen, go back to logged in menu
             currentState = STATE_IS_LOGGED_IN;
-            
-            
         }
 
+        public static void showMovies()
+        {
+            Dictionary<string, ConsoleGui.Element> runningMovies = getAllRunningMovies();
+            if (runningMovies.Count == 0)
+            {
+                Console.Out.WriteLine("There are no active movies now! \n Come back later.");
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            Console.Out.WriteLine("Currently running movies : \n");
+            ConsoleGui.list(runningMovies);
+            
+            
+            int choice = ConsoleGui.multipleChoice("", "tbuy a ticket",
+                "bback");
+            switch (choice)
+            {
+                case -1:
+                    currentState = STATE_EXIT;
+                    break;
+                case 0: 
+                    currentState = STATE_CUSTOMER_BUY_TICKET_MOVIE;
+                    break;
+                
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    break;
+            }
+            return;
+        }
+
+        public static void buyTicket()
+        {
+            Movie movie = null;
+            Theater theater = null;
+            Theater.TimeSlot timeSlot = null;
+            while (movie == null)
+            {
+                movie = (Movie)ConsoleGui.getElementByMultipleChoice("For which movie do you want to order a ticket?", getAllRunningMovies());
+            }
+            while (theater == null)
+            {
+                theater = (Theater)ConsoleGui.getElementByMultipleChoice("For which theather do you want to order a ticket?", getAllTheatersByMovie(movie));
+            }
+            while (timeSlot == null)
+            {
+                timeSlot = (Theater.TimeSlot)ConsoleGui.getElementByMultipleChoice("For which movie do you want to order a ticket?", getAllTimeSlotsByTheaterAndMovie(theater, movie));
+            }
+            int ans = ConsoleGui.multipleChoice("Do you want to buy a ticket for "+movie.getTitle()+" in theater "+theater.getId()+" with the time slot "+timeSlot.__toString()+" ?", "yyes", "nno");
+            if (ans == 0 && movie != null)
+            {
+                // TODO INTERGRATE SEATGROUPS
+                // With a small front-end thingy 
+                Ticket ticket = new Ticket(theater, movie, 25);
+                Console.Out.WriteLine("You purchased a ticket for the Movie: " + movie.getTitle() + "! \n   See you soon!");
+                currentState = STATE_IS_LOGGED_IN;
+            }
+            else
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            return;
+        }
+        
+        
+        
+        private static Dictionary<string, ConsoleGui.Element> getAllRunningMovies()
+        {
+            int count = -1;
+            List<Movie> currentMovieList = new List<Movie>();
+            foreach (Theater theater in theaterList.Values.ToList())
+            {
+                foreach (Theater.TimeSlot timeSlot in theater.GetTimeSlots())
+                {
+                    if (!currentMovieList.Contains(timeSlot.getMovie()) && timeSlot.getMovie().getTitle() != "None")
+                    {
+                        count++;
+                        currentMovieList.Add(timeSlot.getMovie());
+                    }
+                }
+            }
+            
+            Dictionary<string, ConsoleGui.Element> allCurrentMovies = new Dictionary<string, ConsoleGui.Element>();
+            count = -1;
+            
+            foreach (Movie currentMovie in currentMovieList)
+            {
+                count++;
+                allCurrentMovies.Add(count.ToString(),currentMovie);
+            }
+            
+            return allCurrentMovies;
+        }
+
+        private static Dictionary<string, ConsoleGui.Element> getAllTheatersByMovie(Movie movie)
+        {
+            int count = -1;
+            Dictionary<string, ConsoleGui.Element> theatersWithMovie = new Dictionary<string, ConsoleGui.Element>();
+            foreach (Theater theater in theaterList.Values.ToList())
+            {
+                foreach (Theater.TimeSlot timeSlot in theater.GetTimeSlots())
+                {
+                    if (timeSlot.getMovie() == movie)
+                    {
+                        count++;
+                        theatersWithMovie.Add(count.ToString(),theater);
+                        break;
+                    }
+                }
+            }
+
+            return theatersWithMovie;
+        }
+
+        private static Dictionary<string, ConsoleGui.Element> getAllTimeSlotsByTheaterAndMovie(Theater theater, Movie movie)
+        {
+            int count = -1;
+            Dictionary<string, ConsoleGui.Element> timeSlotsWithMovie = new Dictionary<string, ConsoleGui.Element>();
+            foreach (Theater.TimeSlot timeSlot in theater.GetTimeSlots())
+            {
+                if (timeSlot.getMovie() == movie)
+                {
+                    count++;
+                    timeSlotsWithMovie.Add(count.ToString(),timeSlot);
+                    break;
+                }
+            }
+
+            return timeSlotsWithMovie;
+        }
        
 
         //classes
@@ -651,8 +812,9 @@ namespace project_bioscooop
         public class Ticket
         {
             public readonly int ticketID;
-            public readonly Theater Theater;
+            public readonly Theater theater;
             public readonly Movie movie;
+            public readonly Account account;
             public int price;
             
             public void list()
@@ -663,6 +825,14 @@ namespace project_bioscooop
             public string getMPQListing()
             {
                 throw new NotImplementedException();
+            }
+
+            public Ticket(Theater theater, Movie movie, int price)
+            {
+                this.theater = theater;
+                this.movie = movie;
+                this.account = activeUser;
+                this.price = price;
             }
         }
 
@@ -746,6 +916,7 @@ namespace project_bioscooop
 
             public override string getMPQListing()
             {
+                // TODO THIS NEEDS TO BE IMPROVED FOR THE FRONTEND
                 return (" Id: " + theaterId + " available amount of timeslots: " + getAmountOfavailableTimeslots());
             }
             
@@ -911,6 +1082,11 @@ namespace project_bioscooop
                     end = inp_end;
                     runningMovie = Movie.getNoneMovie();
                     seatgroups = inp_seatgroups;
+                }
+
+                public string __toString()
+                {
+                    return begin + " - " + end;
                 }
                 
                 
