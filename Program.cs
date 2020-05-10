@@ -358,7 +358,6 @@ namespace project_bioscooop
             }
         }
 
-        //TODO WIP Caterer menu add and remove (Ahmet)
         public static void StateCatererAddMenu()
         {
             string name = ConsoleGui.openQuestion("Please give the name of the food item you want to add: ");
@@ -382,7 +381,6 @@ namespace project_bioscooop
                     currentState = STATE_IS_LOGGED_IN;
                     return;
                 case 0:
-                    //TODO check on the .Add function why it is not working (Ahmet)
                     menuItem.Add(newFoodItem.getId(), newFoodItem);
                     break;
             }
@@ -393,7 +391,6 @@ namespace project_bioscooop
             return;
         }
 
-        //TODO finish this V (Ahmet)
         public static void stateCatererRemoveMenu()
         {
             MenuItem removeFoodItem =
