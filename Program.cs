@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
@@ -31,6 +32,9 @@ namespace project_bioscooop
         private const int STATE_CREATE_ACCOUNT = 1;
         private const int STATE_LOG_IN = 2;
         private const int STATE_IS_LOGGED_IN = 3;
+        
+        private const int STATE_CUSTOMER_SHOW_CATERER_MENU = 4;
+        private const int STATE_CUSTOMER_SHOW_MOVIES = 5;
 
         private const int STATE_MANAGER_ADD_MOVIE = 11;
         private const int STATE_MANAGER_REMOVE_MOVIE = 12;
@@ -42,7 +46,6 @@ namespace project_bioscooop
 
         private const int STATE_CATERER_ADD_MENU = 20;
         private const int STATE_CATERER_REMOVE_MENU = 22;
-
 
         private static int currentState = 0;
         private static Account activeUser = null;
@@ -94,6 +97,13 @@ namespace project_bioscooop
                     case STATE_MANAGER_MANAGE_THEATER:
                         stateManagerManageTheater();
                         break;
+                    case STATE_CUSTOMER_SHOW_MOVIES:
+                        stateCustomerShowMovies();
+                        break;
+                    case STATE_CUSTOMER_SHOW_CATERER_MENU:
+                        stateCustomerShowCatererMenu();
+                        break;
+                    
                 }
             }
         }
@@ -103,8 +113,8 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin", "admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer",
-                new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("customer", new Account("customer", "customer", 69,"customer@gmail.com", Account.ROLE_USER));
             // Generator.generateMovieData(100, movieList);
 
             Theater testTheater = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
@@ -218,23 +228,29 @@ namespace project_bioscooop
 
         public static void stateLoggedIn()
         {
-            Action<int> userMenu = (int role) =>
+            //TODO talk about the 'See my account' function what it is suppose to do? (AHMET)
+            Action<int> customerMenu = (int role) =>
             {
                 if (role == Account.ROLE_USER)
                 {
-                    //TODO add switch case for user menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account"))
+                        "ccheck available movies", "ssee my account", "msee menu"))
                     {
                         case -1:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
+                        case 0:
+                            currentState = STATE_CUSTOMER_SHOW_MOVIES;
+                            break;
+                        case 2:
+                            currentState = STATE_CUSTOMER_SHOW_CATERER_MENU;
+                            break;
                     }
                 }
                 else
                 {
-                    ConsoleGui.debugLine("something went horribly wrong with the permissions");
+                    ConsoleGui.debugLine("Something went horribly wrong with the permissions.");
                     activeUser = null;
                     currentState = STATE_MAIN;
                 }
@@ -344,7 +360,7 @@ namespace project_bioscooop
             switch (activeUser.role)
             {
                 case 0:
-                    userMenu(activeUser.role);
+                    customerMenu(activeUser.role);
                     break;
                 case 1:
                     catererMenu(activeUser.role);
@@ -356,6 +372,46 @@ namespace project_bioscooop
                     adminMenu(activeUser.role);
                     break;
             }
+        }
+
+        public static void stateCustomerShowMovies()
+        {
+            Movie showMovie =
+                (Movie) ConsoleGui.getElementByMultipleChoice("Which movie would you like to choose?", movieList);
+            
+            
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            
+            switch (ans)
+            {
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    break;
+            }
+            
+            ConsoleGui.list(movieList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+        }
+
+        public static void stateCustomerShowCatererMenu()
+        {
+            MenuItem showFoodItem =
+                (MenuItem) ConsoleGui.getElementByMultipleChoice("Which food item would you like to choose?", menuItem);
+            
+            
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            
+            switch (ans)
+            {
+             case 1:
+                 currentState = STATE_IS_LOGGED_IN;
+                 break;
+            }
+            
+            ConsoleGui.list(menuItem);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
         }
 
         public static void StateCatererAddMenu()
