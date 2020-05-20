@@ -275,7 +275,7 @@ namespace project_bioscooop
                 if (role == Account.ROLE_CATERING)
                 {
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "aAdd food items", "rRemove FoodItem"))
+                        "aAdd food items", "rRemove Food Item"))
                     {
                         case -1:
                             activeUser = null;
