@@ -429,7 +429,7 @@ namespace project_bioscooop
 
             int check = ConsoleGui.multipleChoice(
                 "Do you want to add the food item : " + newFoodItem.getName() + "(" + newFoodItem.getId() + ")" +
-                " with the price of €" + newFoodItem.getPrice(),
+                " with the price of " + newFoodItem.getPrice() + " euro",
                 "yyes", "nno");
             switch (check)
             {
