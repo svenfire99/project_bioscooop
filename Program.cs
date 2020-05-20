@@ -248,7 +248,7 @@ namespace project_bioscooop
                 if (role == Account.ROLE_USER)
                 {
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account", "msee menu"))
+                        "ccheck available movies", "msee menu", "bsee basket"))
                     {
                         case -1:
                             activeUser = null;
@@ -257,8 +257,11 @@ namespace project_bioscooop
                         case 0:
                             currentState = STATE_CUSTOMER_SHOW_MOVIES;
                             break;
-                        case 2:
+                        case 1:
                             currentState = STATE_CUSTOMER_SHOW_CATERER_MENU;
+                            break;
+                        case 2:
+                            currentState = STATE_CUSTOMER_SHOW_BASKET;
                             break;
                     }
                 }
@@ -303,13 +306,13 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for employee menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account","llog out"))
+                        "ccheck available movies","llog out"))
                     {
                         case -1:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
-                        case 2:
+                        case 1:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
