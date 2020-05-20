@@ -43,7 +43,7 @@ namespace project_bioscooop
         private const int STATE_CATERER_ADD_MENU = 20;
         private const int STATE_CATERER_REMOVE_MENU = 22;
         private const int STATE_CATERER_CHANGE_MENU = 21;
-        
+
         private const int STATE_CUSTOMER_SHOW_MOVIES = 31;
         private const int STATE_CUSTOMER_BUY_TICKET_MOVIE = 32;
         private const int STATE_CUSTOMER_SHOW_CATHERING = 33;
@@ -104,7 +104,7 @@ namespace project_bioscooop
                         stateManagerManageTheater();
                         break;
                     
-                    case STATE_CUSTOMER_SHOW_CATERER_MENU:
+                    case STATE_CUSTOMER_SHOW_CATHERING:
                         stateCustomerShowCatererMenu();
                         break;
                     case STATE_CUSTOMER_SHOW_MOVIES:
@@ -254,7 +254,7 @@ namespace project_bioscooop
                             currentState = STATE_CUSTOMER_SHOW_MOVIES;
                             break;
                         case 2:
-                            currentState = STATE_CUSTOMER_SHOW_CATERER_MENU;
+                            currentState = STATE_CUSTOMER_SHOW_CATHERING;
                             break;
                         case 3:
                             activeUser = null;
@@ -286,6 +286,7 @@ namespace project_bioscooop
                             break;
                         case 1:
                             currentState = STATE_CATERER_REMOVE_MENU;
+                            break;
                         case 3:
                             activeUser = null;
                             currentState = STATE_MAIN;
@@ -334,7 +335,6 @@ namespace project_bioscooop
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
                         "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater",
                         "6manage theater"))
-                        "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater", "6manage theater","llog out"))
                     {
                         case -1:
                             activeUser = null;
@@ -970,24 +970,24 @@ namespace project_bioscooop
             public readonly Movie movie;
             public readonly Account account;
             public int price;
-        }
       
-        public void list()
-        {
-            throw new NotImplementedException();
-        }
+            public void list()
+            {
+                throw new NotImplementedException();
+            }
 
-        public string getMPQListing()
-        {
-            throw new NotImplementedException();
-        }
+            public string getMPQListing()
+            {
+                throw new NotImplementedException();
+            }
 
-        public Ticket(Theater theater, Movie movie, int price)
-        {
-            this.theater = theater;
-            this.movie = movie;
-            this.account = activeUser;
-            this.price = price;
+            public Ticket(Theater theater, Movie movie, int price)
+            {
+                this.theater = theater;
+                this.movie = movie;
+                this.account = activeUser;
+                this.price = price;
+            }
         }
     }
 
