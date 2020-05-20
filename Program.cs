@@ -144,23 +144,23 @@ namespace project_bioscooop
             theaterList.Add(testTheater.getId(), testTheater);
             theaterList.Add(testTheater2.getId(), testTheater2);
 
-            // When application starts system makes new folder structure with a .json file in it
-            string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
-            DirectoryInfo di = Directory.CreateDirectory(path);
-            
-            string subFolder = System.IO.Path.Combine(path, "SubFolder");
-            DirectoryInfo su = Directory.CreateDirectory(subFolder);
-            
-            string fileName = "MyNewFile.json";
-            subFolder = System.IO.Path.Combine(subFolder, fileName);
-            
-            if (!System.IO.File.Exists(subFolder))
-            {
-                using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
-                {
-                    Console.WriteLine("File created!");
-                }
-            }
+            // // When application starts system makes new folder structure with a .json file in it
+            // string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
+            // DirectoryInfo di = Directory.CreateDirectory(path);
+            //
+            // string subFolder = System.IO.Path.Combine(path, "SubFolder");
+            // DirectoryInfo su = Directory.CreateDirectory(subFolder);
+            //
+            // string fileName = "MyNewFile.json";
+            // subFolder = System.IO.Path.Combine(subFolder, fileName);
+            //
+            // if (!System.IO.File.Exists(subFolder))
+            // {
+            //     using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
+            //     {
+            //         Console.WriteLine("File created!");
+            //     }
+            // }
         }
 
         //states
@@ -390,26 +390,6 @@ namespace project_bioscooop
                     adminMenu(activeUser.role);
                     break;
             }
-        }
-
-        public static void stateCustomerShowMovies()
-        {
-            Movie showMovie =
-                (Movie) ConsoleGui.getElementByMultipleChoice("Which movie would you like to choose?", movieList);
-            
-            
-            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
-            
-            switch (ans)
-            {
-                case 1:
-                    currentState = STATE_IS_LOGGED_IN;
-                    break;
-            }
-            
-            ConsoleGui.list(movieList);
-            currentState = STATE_IS_LOGGED_IN;
-            return;
         }
 
         public static void StateCatererAddMenu()
@@ -788,7 +768,8 @@ namespace project_bioscooop
                 // TODO INTERGRATE SEATGROUPS
                 // With a small front-end thingy 
                 Ticket ticket = new Ticket(theater, movie, 25);
-                Console.Out.WriteLine("You purchased a ticket for the Movie: " + movie.getTitle() + "! \n   See you soon!");
+                activeUser.basket.addTicketToBasket(ticket, 1);
+                Console.Out.WriteLine("You added a ticket to your basket. The Movie: " + movie.getTitle() + "! \n   See you soon!");
                 currentState = STATE_IS_LOGGED_IN;
             }
             else
@@ -804,10 +785,11 @@ namespace project_bioscooop
             MenuItem foodItem = null;
             int amount = -1;
             
-            foodItem = (MenuItem) ConsoleGui.getElementByMultipleChoice("Which food item would you like to add to basket?", menuItem);
+            foodItem = (MenuItem) ConsoleGui.getElementByMultipleChoice("Which food item would you like to add to basket?", getAllFoodItems());
             if (foodItem == null)
             {
                 currentState = STATE_IS_LOGGED_IN;
+                return;
             }
             
             while (amount <= 0)
@@ -844,7 +826,6 @@ namespace project_bioscooop
 
         public static void showBasket()
         {
-            Console.Out.WriteLine("Your basket contents: ");
             activeUser.basket.showAllBasket();
             
             switch (ConsoleGui.multipleChoice("What do you want to do?",
@@ -941,8 +922,31 @@ namespace project_bioscooop
                     break;
                 }
             }
+            
 
             return timeSlotsWithMovie;
+        }
+        
+        private static Dictionary<string, ConsoleGui.Element> getAllFoodItems()
+        {
+            int count = -1;
+            List<MenuItem> foodItemsList = new List<MenuItem>();
+            Dictionary<string, ConsoleGui.Element> allFoodItems = new Dictionary<string, ConsoleGui.Element>();
+            foreach (MenuItem menuItem in menuItem.Values.ToList())
+            {
+                if (!foodItemsList.Contains(menuItem) && menuItem.getName() != "None")
+                {
+                    foodItemsList.Add(menuItem);
+                }
+            }
+            
+            foreach (MenuItem foodItem in foodItemsList)
+            {
+                count++;
+                allFoodItems.Add(count.ToString(),foodItem);
+            }
+            
+            return allFoodItems;
         }
         
         
@@ -984,23 +988,34 @@ namespace project_bioscooop
                 public Dictionary<int, ConsoleGui.Element> basketTickets = new Dictionary<int, ConsoleGui.Element>();
                 public int state;
 
-                private int basketCounter = -1;
+                private int foodBasketCounter = -1;
+                private int ticketBasketCounter = -1;
 
                 public void addFoodToBasket(MenuItem menuItem, int amount)
                 {
-                    basketCounter++;
+                    foodBasketCounter++;
                     BasketFoodItem basketFoodItem = new BasketFoodItem(menuItem, amount);
-                    basketFoodItems.Add(basketCounter, basketFoodItem);
+                    basketFoodItems.Add(foodBasketCounter, basketFoodItem);
+                }
+
+                public void addTicketToBasket(Ticket ticket, int amount)
+                {
+                    ticketBasketCounter++;
+                    BasketTicketItem basketFoodItem = new BasketTicketItem(ticket, amount);
+                    basketTickets.Add(ticketBasketCounter, basketFoodItem);
                 }
 
                 public void emptyBasket()
                 {
                     basketFoodItems = new Dictionary<int, ConsoleGui.Element>();
+                    basketTickets = new Dictionary<int, ConsoleGui.Element>();
                 }
 
                 public void showAllBasket()
                 {
+                    Console.Out.WriteLine("Your basket contents: ");
                     ConsoleGui.list(basketFoodItems);
+                    ConsoleGui.list(basketTickets);
                 }
 
                 class BasketFoodItem : ConsoleGui.Element
@@ -1023,6 +1038,28 @@ namespace project_bioscooop
                     public override string getMPQListing()
                     {
                         return "id: " + menuItem.getName() + "   x " + amount;
+                    }
+                }
+
+                class BasketTicketItem : ConsoleGui.Element
+                {
+                    public readonly Ticket ticket;
+                    public readonly int amount;
+
+                    public BasketTicketItem(Ticket ticket, int amount)
+                    {
+                        this.ticket = ticket;
+                        this.amount = amount;
+                    }
+
+                    public override void list()
+                    {
+                        Console.Out.WriteLine("  - " + ticket.getMovie().getTitle() + " x " + amount.ToString() + " - " + (ticket.price * amount).ToString() + " euro");
+                    }
+
+                    public override string getMPQListing()
+                    {
+                        return "id: " + ticket.getMovie().getTitle() + "   x " + amount;
                     }
                 }
             }
@@ -1093,11 +1130,11 @@ namespace project_bioscooop
                 this.account = activeUser;
                 this.price = price;
             }
-        }
 
-        public string getMPQListing()
-        {
-            throw new NotImplementedException();
+            public Movie getMovie()
+            {
+                return this.movie;
+            }
         }
     }
 
