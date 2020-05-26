@@ -52,6 +52,8 @@ namespace project_bioscooop
         private const int STATE_CUSTOMER_PURCHASE_BASKET = 36;
         private const int STATE_CUSTOMER_VIEW_PURCHASE = 37;
 
+        private const int STATE_EMPLOYEE_SHOW_MOVIES = 40;
+
         private static int currentState = 0;
         private static Account activeUser = null;
 
@@ -78,7 +80,6 @@ namespace project_bioscooop
                     case STATE_IS_LOGGED_IN:
                         stateLoggedIn();
                         break;
-                    
                     case STATE_MANAGER_ADD_MOVIE:
                         stateManagerAddMovie();
                         break;
@@ -103,7 +104,6 @@ namespace project_bioscooop
                     case STATE_MANAGER_MANAGE_THEATER:
                         stateManagerManageTheater();
                         break;
-                    
                     case STATE_CUSTOMER_SHOW_CATHERING:
                         stateCustomerShowCatererMenu();
                         break;
@@ -112,6 +112,9 @@ namespace project_bioscooop
                         break;
                     case STATE_CUSTOMER_BUY_TICKET_MOVIE:
                         buyTicket();
+                        break;
+                    case STATE_EMPLOYEE_SHOW_MOVIES:
+                        showEmployeeMovies();
                         break;
                 }
             }
@@ -124,6 +127,7 @@ namespace project_bioscooop
             accountList.Add("admin", new Account("admin", "admin", 420, "admin", Account.ROLE_ADMIN));
             accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
             accountList.Add("frontend", new Account("frontend","frontend", 420, "frontend", Account.ROLE_USER));
+            accountList.Add("employee", new Account("employee", "employee", 420, "employee@gamil.com", Account.ROLE_EMPLOYEE));
             
             // Generator.generateMovieData(100, movieList);
           
@@ -172,7 +176,6 @@ namespace project_bioscooop
                 case 0:
                     currentState = STATE_LOG_IN;
                     break;
-
                 case 1:
                     currentState = STATE_CREATE_ACCOUNT;
                     break;
@@ -307,15 +310,14 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for employee menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account","llog out"))
+                        "ccheck available movies", "llog out"))
                     {
                         case -1:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
-                        case 2:
-                            activeUser = null;
-                            currentState = STATE_MAIN;
+                        case 0:
+                            currentState = STATE_EMPLOYEE_SHOW_MOVIES;
                             break;
                     }
                 }
@@ -398,6 +400,25 @@ namespace project_bioscooop
                     adminMenu(activeUser.role);
                     break;
             }
+        }
+
+        public static void showEmployeeMovies()
+        {
+            Movie showMovie =
+                (Movie) ConsoleGui.getElementByMultipleChoice("Which movie would you like to choose?", movieList);
+
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            
+            switch (ans)
+            {
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    break;
+            }
+            
+            ConsoleGui.list(movieList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
         }
 
         public static void stateCustomerShowMovies()
