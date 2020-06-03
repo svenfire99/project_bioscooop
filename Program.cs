@@ -104,15 +104,31 @@ namespace project_bioscooop
                         stateManagerManageTheater();
                         break;
                     
-                    case STATE_CUSTOMER_SHOW_CATHERING:
-                        stateCustomerShowCatererMenu();
+                    case STATE_CATERER_ADD_MENU:
+                        StateCatererAddMenu();
                         break;
+                    case STATE_CATERER_REMOVE_MENU:
+                        stateCatererRemoveMenu();
+                        break;
+                    
                     case STATE_CUSTOMER_SHOW_MOVIES:
                         showMovies();
                         break;
                     case STATE_CUSTOMER_BUY_TICKET_MOVIE:
                         buyTicket();
                         break;
+                    case STATE_CUSTOMER_SHOW_CATHERING:
+                        showCatererMenu();
+                        break;
+                    case STATE_CUSTOMER_SHOW_BASKET:
+                        showBasket();
+                        break;
+                    // case STATE_CUSTOMER_PURCHASE_BASKET:
+                    //     purchaseBasket();
+                    //     break;
+                    // case STATE_CUSTOMER_VIEW_PURCHASE:
+                    //     viewPurchasedBasket();
+                    //     break;
                 }
             }
         }
@@ -126,37 +142,37 @@ namespace project_bioscooop
             accountList.Add("frontend", new Account("frontend","frontend", 420, "frontend", Account.ROLE_USER));
             
             // Generator.generateMovieData(100, movieList);
-          
+            movieList.Add("-1", Movie.getNoneMovie());
+            movieList.Add("0", new Movie("forzen 5", new TimeSpan(4,20, 69)));
+            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4,20, 69)));
+
+            menuItem.Add("-1", MenuItem.GetNoneMenuItem());
+            menuItem.Add("0", new MenuItem("Hot Dogs", 5.80, 5));
+            menuItem.Add("1", new MenuItem("Fries", 3.50,30));
+            
             Theater testTheater = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
             Theater testTheater2 = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
             theaterList.Add(testTheater.getId(), testTheater);
             theaterList.Add(testTheater2.getId(), testTheater2);
-
-            movieList.Add("-1", Movie.getNoneMovie());
-            movieList.Add("0", new Movie("frozen 5", new TimeSpan(4, 20, 69)));
-            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4, 20, 69)));
-
-            menuItem.Add("-1", MenuItem.GetNoneMenuItem());
-            menuItem.Add("0", new MenuItem("Hot Dogs", 5.80));
-            menuItem.Add("1", new MenuItem("Fries", 3.50));
-
+            
             // When application starts system makes new folder structure with a .json file in it
             string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
             DirectoryInfo di = Directory.CreateDirectory(path);
 
-            string subFolder = System.IO.Path.Combine(path, "SubFolder");
             DirectoryInfo su = Directory.CreateDirectory(subFolder);
+            string subFolder = System.IO.Path.Combine(path, "SubFolder");
 
             string fileName = "MyNewFile.json";
             subFolder = System.IO.Path.Combine(subFolder, fileName);
 
             if (!System.IO.File.Exists(subFolder))
-            {
                 using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
-                {
-                    Console.WriteLine("File created!");
-                }
+            {
             }
+                }
+                    Console.WriteLine("File created!");
+                {
+
         }
 
         //states
@@ -244,7 +260,7 @@ namespace project_bioscooop
                 if (role == Account.ROLE_USER)
                 {
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account", "msee menu", "llog out"))
+                        "ccheck available movies", "ssee my account", "msee menu", "bsee basket"))
                     {
                         case -1:
                             activeUser = null;
@@ -253,12 +269,11 @@ namespace project_bioscooop
                         case 0:
                             currentState = STATE_CUSTOMER_SHOW_MOVIES;
                             break;
-                        case 2:
+                        case 1:
                             currentState = STATE_CUSTOMER_SHOW_CATHERING;
                             break;
-                        case 3:
-                            activeUser = null;
-                            currentState = STATE_MAIN;
+                        case 2:
+                            currentState = STATE_CUSTOMER_SHOW_BASKET;
                             break;
                     }
                 }
@@ -291,6 +306,9 @@ namespace project_bioscooop
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
+                        case 1:
+                            currentState = STATE_CATERER_REMOVE_MENU;
+                            break;
                     }
                 }
                 else
@@ -307,13 +325,13 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for employee menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account","llog out"))
+                        "ccheck available movies","llog out"))
                     {
                         case -1:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
-                        case 2:
+                        case 1:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
@@ -364,10 +382,6 @@ namespace project_bioscooop
                         case 5:
                             currentState = STATE_MANAGER_MANAGE_THEATER;
                             break;
-                        case 6:
-                            activeUser = null;
-                            currentState = STATE_MAIN;
-                            break;
                     }
                 }
                 else
@@ -400,6 +414,14 @@ namespace project_bioscooop
             }
         }
 
+        public static void StateCatererAddMenu()
+        {
+            string name = ConsoleGui.openQuestion("Please give the name of the food item you want to add: ");
+            if (name == "exit")
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
         public static void stateCustomerShowMovies()
         {
             Movie showMovie =
@@ -420,6 +442,9 @@ namespace project_bioscooop
             return;
         }
 
+            double price = ConsoleGui.getInteger("Please give the price of the food item: ");
+            
+            int stock = ConsoleGui.getInteger("Please give the stock of the food item: ");
         public static void stateCustomerShowCatererMenu()
         {
             MenuItem showFoodItem =
@@ -440,6 +465,26 @@ namespace project_bioscooop
             return;
         }
 
+            MenuItem newFoodItem = new MenuItem(name, price, stock);
+
+            int check = ConsoleGui.multipleChoice(
+                "Do you want to add the food item : " + newFoodItem.getName() + "(" + newFoodItem.getId() + ")" +
+                " with the price of " + newFoodItem.getPrice() + " euro with a stock quantity of " + newFoodItem.getStock(),
+                "yyes", "nno");
+            switch (check)
+            {
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    return;
+                case 0:
+                    menuItem.Add(newFoodItem.getId(), newFoodItem);
+                    break;
+            }
+
+            Console.Out.WriteLine("Current food items : \n");
+            ConsoleGui.list(menuItem);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
         public static void StateCatererAddMenu()
         {
             string name = ConsoleGui.openQuestion("Please give the name of the food item you want to add: ");
@@ -578,7 +623,7 @@ namespace project_bioscooop
             {
                 if (movie.getTitle() != "None")
                 {
-                    theaterList.Remove(movie.getId());
+                    movieList.Remove(movie.getId());
                 }
             }
             else
@@ -608,7 +653,11 @@ namespace project_bioscooop
                 while (edit)
                 {
                     string name =
-                        ConsoleGui.openQuestion("Please give the name of the movie (" + movie.getTitle() + "): ");
+                        ConsoleGui.openQuestion("Please give a new name for the movie '" + movie.getTitle() + "' or press enter for the same name: ");
+                    if (name == "" || name == null)
+                    {
+                        name = oldMovie.getTitle();
+                    }
                     if (name == "exit")
                     {
                         currentState = STATE_IS_LOGGED_IN;
@@ -620,15 +669,26 @@ namespace project_bioscooop
                         movie.setTitle(name);
                     }
 
-                    int time = ConsoleGui.getInteger("Please give the duration of the movie in minutes: ");
-                    if (!(time == null))
+                    Boolean valid = true;
+                    while (valid)
                     {
-                        movie.setTime(TimeSpan.FromMinutes(time));
+                        string time = ConsoleGui.openQuestion("Please give the duration of the movie in minutes or press enter for the old duration ("+movie.getTime()+"): ");
+                        if (time == null || time == "")
+                        {
+                            movie.setTime(movie.getTimeSpan());
+                            valid = false;
+                        }
+
+                        if (int.TryParse(time, out int timeOut))
+                        {
+                            movie.setTime(TimeSpan.FromMinutes(timeOut));
+                            valid = false;
+                        }
                     }
 
                     if (ConsoleGui.multipleChoice(
-                        "Do you want to add the movie : " + movie.getTitle() + "(" + movie.getId() + ")" +
-                        " with the duration of " + movie.getTime(),
+                        "Do you want to confirm the changes : " + "[" + movie.getId() + "]" + movie.getTitle() + "(Old Title: " + oldMovie.getTitle() + ")" +
+                        " with the duration of " + movie.getTime()+ "(Old Duration: " + oldMovie.getTime() + ")",
                         "yyes", "nno") == 0)
                     {
                         edit = false;
@@ -775,7 +835,7 @@ namespace project_bioscooop
             ConsoleGui.list(runningMovies);
             
             
-            int choice = ConsoleGui.multipleChoice("", "tbuy a ticket",
+            int choice = ConsoleGui.multipleChoice("What do you want to do? ", "tbuy a ticket",
                 "bback");
             switch (choice)
             {
@@ -816,7 +876,8 @@ namespace project_bioscooop
                 // TODO INTERGRATE SEATGROUPS
                 // With a small front-end thingy 
                 Ticket ticket = new Ticket(theater, movie, 25);
-                Console.Out.WriteLine("You purchased a ticket for the Movie: " + movie.getTitle() + "! \n   See you soon!");
+                activeUser.basket.addTicketToBasket(ticket, 1);
+                Console.Out.WriteLine("You added a ticket to your basket. The Movie: " + movie.getTitle() + "! \n   See you soon!");
                 currentState = STATE_IS_LOGGED_IN;
             }
             else
@@ -826,9 +887,103 @@ namespace project_bioscooop
             }
             return;
         }
+
+        public static void showCatererMenu()
+        {
+            MenuItem foodItem = null;
+            int amount = -1;
+            
+            foodItem = (MenuItem) ConsoleGui.getElementByMultipleChoice("Which food item would you like to add to basket?", getAllFoodItems());
+            if (foodItem == null)
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            
+            while (amount <= 0)
+            {
+                amount = ConsoleGui.getInteger("How many do you want? (Currently in stock: "+foodItem.getStock() +") :");
+                if (amount <= 0 )
+                {
+                    Console.Out.WriteLine("Please give a valid quantity!! (More than zero)");
+                }
+
+                if (amount > foodItem.getStock())
+                {
+                    amount = foodItem.getStock();
+                    Console.Out.WriteLine("Since you wanted more than the stock level we adjusted yhe amount to the max quantity available.");
+                }
+            }
+            
+            
+            int ans = ConsoleGui.multipleChoice("Are you sure you want to add "+foodItem.getName()+" with the quantity of "+amount.ToString()+" to the basket?", "yyes", "nno");
+            
+            switch (ans)
+            {
+                case -1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    break;
+                case 0:
+                    activeUser.basket.addFoodToBasket(foodItem,amount);
+                    foodItem.removeFromStock(amount);
+                    currentState = STATE_CUSTOMER_SHOW_CATHERING;
+                    return;
+                    break;
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    break;
+            }
+            
+            // ConsoleGui.list(menuItem);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+        }
+
+        public static void showBasket()
+        {
+            if (!activeUser.basket.isBasketEmtpy())
+            {
+                activeUser.basket.showAllBasket();
+
+                switch (ConsoleGui.multipleChoice("What do you want to do?",
+                    "ppurchase basket"))
+                {
+                    case -1:
+                        activeUser = null;
+                        currentState = STATE_IS_LOGGED_IN;
+                        break;
+                    case 0:
+                        purchaseBasket();
+                        break;
+                }
+            }
+            else
+            {
+                Console.Out.WriteLine("There is nothing in your basket yet.");
+                currentState = STATE_IS_LOGGED_IN;
+            }
+        }
+
+        public static void purchaseBasket()
+        {
+            int ans = ConsoleGui.multipleChoice("Are you sure you want to buy all the contents of the basket?", "yyes", "nno");
+            switch (ans)
+            {
+                case -1:
+                case 1 :
+                    currentState = STATE_IS_LOGGED_IN;
+                    break;
+                case 0:
+                    activeUser.basket.emptyBasket();
+                    currentState = STATE_IS_LOGGED_IN;
+                    break;
+            }
+            Console.Out.WriteLine("Welp... since there is no payment method yet everything is free!");
+            return;
+        }
         
         
-        
+        // Front-End Functions \\
         private static Dictionary<string, ConsoleGui.Element> getAllRunningMovies()
         {
             int count = -1;
@@ -890,11 +1045,34 @@ namespace project_bioscooop
                     break;
                 }
             }
+            
 
             return timeSlotsWithMovie;
         }
-       
-
+        
+        private static Dictionary<string, ConsoleGui.Element> getAllFoodItems()
+        {
+            int count = -1;
+            List<MenuItem> foodItemsList = new List<MenuItem>();
+            Dictionary<string, ConsoleGui.Element> allFoodItems = new Dictionary<string, ConsoleGui.Element>();
+            foreach (MenuItem menuItem in menuItem.Values.ToList())
+            {
+                if (!foodItemsList.Contains(menuItem) && menuItem.getName() != "None"|| menuItem.getStock() > 0)
+                {
+                    foodItemsList.Add(menuItem);
+                }
+            }
+            
+            foreach (MenuItem foodItem in foodItemsList)
+            {
+                count++;
+                allFoodItems.Add(count.ToString(),foodItem);
+            }
+            
+            return allFoodItems;
+        }
+        
+        
         //classes
         public class Account : ConsoleGui.Element
         {
@@ -912,10 +1090,111 @@ namespace project_bioscooop
 
             private static int AccountIDCounter = 0;
 
+            public Basket basket;
+
             private static int getAccountID()
             {
                 AccountIDCounter++;
                 return AccountIDCounter;
+            }
+
+            public class Basket
+            {
+                private const int STATE_FAILED = -1;
+                private const int STATE_PENDING = 0;
+                private const int STATE_PAYED = 1;
+                private const int STATE_CANCELLED = 4;
+
+                public int id;
+                public Account account;
+                public Dictionary<int, ConsoleGui.Element> basketFoodItems = new Dictionary<int, ConsoleGui.Element>();
+                public Dictionary<int, ConsoleGui.Element> basketTickets = new Dictionary<int, ConsoleGui.Element>();
+                public int state;
+
+                private int foodBasketCounter = -1;
+                private int ticketBasketCounter = -1;
+
+                public void addFoodToBasket(MenuItem menuItem, int amount)
+                {
+                    foodBasketCounter++;
+                    BasketFoodItem basketFoodItem = new BasketFoodItem(menuItem, amount);
+                    basketFoodItems.Add(foodBasketCounter, basketFoodItem);
+                }
+
+                public void addTicketToBasket(Ticket ticket, int amount)
+                {
+                    ticketBasketCounter++;
+                    BasketTicketItem basketFoodItem = new BasketTicketItem(ticket, amount);
+                    basketTickets.Add(ticketBasketCounter, basketFoodItem);
+                }
+
+                public void emptyBasket()
+                {
+                    basketFoodItems = new Dictionary<int, ConsoleGui.Element>();
+                    basketTickets = new Dictionary<int, ConsoleGui.Element>();
+                }
+
+                public Boolean isBasketEmtpy()
+                {
+                    if (basketTickets.Count == 0 && basketFoodItems.Count == 0)
+                    {
+                        return true;
+                    } 
+
+                    return false;
+                }
+
+                public void showAllBasket()
+                {
+                    Console.Out.WriteLine("Your basket contents: ");
+                    ConsoleGui.list(basketFoodItems);
+                    ConsoleGui.list(basketTickets);
+                }
+
+                class BasketFoodItem : ConsoleGui.Element
+                {
+                    public readonly MenuItem menuItem;
+                    public readonly int amount;
+
+                    public BasketFoodItem(MenuItem menuItem, int amount)
+                    {
+                        this.menuItem = menuItem;
+                        this.amount = amount;
+                    }
+
+                    public override void list()
+                    {
+                        Console.Out.WriteLine("  - " + menuItem.getName() + " x " + amount.ToString() + " - " +
+                                              (menuItem.getPrice() * amount).ToString() + " euro");
+                    }
+
+                    public override string getMPQListing()
+                    {
+                        return "id: " + menuItem.getName() + "   x " + amount;
+                    }
+                }
+
+                class BasketTicketItem : ConsoleGui.Element
+                {
+                    public readonly Ticket ticket;
+                    public readonly int amount;
+
+                    public BasketTicketItem(Ticket ticket, int amount)
+                    {
+                        this.ticket = ticket;
+                        this.amount = amount;
+                    }
+
+                    public override void list()
+                    {
+                        Console.Out.WriteLine("  - " + ticket.getMovie().getTitle() + " x " + amount.ToString() + " - " + (ticket.price * amount).ToString() + " euro");
+                    }
+
+                    public override string getMPQListing()
+                    {
+                        return "id: " + ticket.getMovie().getTitle() + "   x " + amount;
+                    }
+                }
             }
 
 
@@ -927,6 +1206,7 @@ namespace project_bioscooop
                 name = inp_name;
                 password = inp_password;
                 age = inp_age;
+                basket = new Basket();
             }
 
             public override void list()
@@ -970,11 +1250,15 @@ namespace project_bioscooop
             public readonly Movie movie;
             public readonly Account account;
             public int price;
+<<<<<<<
       
             public void list()
             {
                 throw new NotImplementedException();
             }
+=======
+
+>>>>>>>
 
             public string getMPQListing()
             {
@@ -988,6 +1272,11 @@ namespace project_bioscooop
                 this.account = activeUser;
                 this.price = price;
             }
+
+            public Movie getMovie()
+            {
+                return this.movie;
+            }
         }
     }
 
@@ -996,6 +1285,7 @@ namespace project_bioscooop
         private readonly int id;
         private string name;
         private double price;
+        private int stock;
 
         private static int menuItemIdCount = -1;
         private ConsoleGui.Element _elementImplementation;
@@ -1025,18 +1315,39 @@ namespace project_bioscooop
             this.price = price;
         }
 
-        public MenuItem(string mIname, double mIprice)
+        public int getStock()
+        {
+            return stock;
+        }
+
+        public void setStock(int stock)
+        {
+            this.stock = stock;
+        }
+
+        public void addToStock(int stock)
+        {
+            this.stock += stock;
+        }
+
+        public void removeFromStock(int stock)
+        {
+            this.stock -= stock;
+        }
+
+        public MenuItem(string mIname, double mIprice, int mStock)
         {
             menuItemIdCount++;
             id = menuItemIdCount;
 
             name = mIname;
             price = mIprice;
+            stock = mStock;
         }
 
         public static MenuItem GetNoneMenuItem()
         {
-            return new MenuItem("None", 00.00);
+            return new MenuItem("None", 00.00, 0);
         }
 
         public override void list()
@@ -1078,6 +1389,11 @@ namespace project_bioscooop
         public string getTime()
         {
             return new DateTime(time.Ticks).ToString("HH:mm");
+        }
+
+        public TimeSpan getTimeSpan()
+        {
+            return time;
         }
 
         public void setTime(TimeSpan time)
@@ -1287,7 +1603,7 @@ namespace project_bioscooop
             {
                 runningMovie = inp_movie;
             }
-            
+
             public TimeSlot(TimeSpan inp_begin, TimeSpan inp_end, SeatGroup[] inp_seatgroups)
             {
                 begin = inp_begin;
@@ -1416,6 +1732,7 @@ namespace project_bioscooop
                     possibleInputs[i] = newAns;
                     Console.Out.WriteLine(listOption);
                 }
+            }
 
                 //add exit for escape
                 Console.Out.WriteLine("[X] Exit\n");
@@ -1442,6 +1759,10 @@ namespace project_bioscooop
             }
         }
 
+                    //list option and save possible answer
+                    possibleInputs[i] = newAns;
+                    Console.Out.WriteLine(listOption);
+                }
 
         public static int getInteger(string question)
         {
