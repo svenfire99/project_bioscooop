@@ -161,8 +161,9 @@ namespace project_bioscooop
             string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
             DirectoryInfo di = Directory.CreateDirectory(path);
             
-            DirectoryInfo su = Directory.CreateDirectory(subFolder);
+            
             string subFolder = System.IO.Path.Combine(path, "SubFolder");
+            DirectoryInfo su = Directory.CreateDirectory(subFolder);
             
             string fileName = "MyNewFile.json";
             subFolder = System.IO.Path.Combine(subFolder, fileName);
@@ -333,6 +334,7 @@ namespace project_bioscooop
                             break;
                         case 0:
                             currentState = STATE_EMPLOYEE_SHOW_MOVIES;
+                            break;
                         case 1:
                             activeUser = null;
                             currentState = STATE_MAIN;
