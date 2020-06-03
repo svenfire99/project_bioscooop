@@ -94,12 +94,6 @@ namespace project_bioscooop
                     case STATE_MANAGER_REMOVE_THEATER:
                         stateManagerRemoveTheater();
                         break;
-                    case STATE_CATERER_ADD_MENU:
-                        StateCatererAddMenu();
-                        break;
-                    case STATE_CATERER_REMOVE_MENU:
-                        stateCatererRemoveMenu();
-                        break;
                     case STATE_MANAGER_MANAGE_THEATER:
                         stateManagerManageTheater();
                         break;
@@ -138,41 +132,42 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin", "admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
-            accountList.Add("frontend", new Account("frontend","frontend", 420, "frontend", Account.ROLE_USER));
-            
+            accountList.Add("caterer",
+                new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("frontend", new Account("frontend", "frontend", 420, "frontend", Account.ROLE_USER));
+
             // Generator.generateMovieData(100, movieList);
             movieList.Add("-1", Movie.getNoneMovie());
-            movieList.Add("0", new Movie("forzen 5", new TimeSpan(4,20, 69)));
-            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4,20, 69)));
+            movieList.Add("0", new Movie("forzen 5", new TimeSpan(4, 20, 69)));
+            movieList.Add("1", new Movie("frozen 6", new TimeSpan(4, 20, 69)));
 
             menuItem.Add("-1", MenuItem.GetNoneMenuItem());
             menuItem.Add("0", new MenuItem("Hot Dogs", 5.80, 5));
-            menuItem.Add("1", new MenuItem("Fries", 3.50,30));
-            
+            menuItem.Add("1", new MenuItem("Fries", 3.50, 30));
+
             Theater testTheater = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
             Theater testTheater2 = new Theater(new Theater.SeatGroup(420, 69, "testSeats"));
             theaterList.Add(testTheater.getId(), testTheater);
             theaterList.Add(testTheater2.getId(), testTheater2);
-            
-            // When application starts system makes new folder structure with a .json file in it
-            string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
-            DirectoryInfo di = Directory.CreateDirectory(path);
 
-            DirectoryInfo su = Directory.CreateDirectory(subFolder);
-            string subFolder = System.IO.Path.Combine(path, "SubFolder");
-
-            string fileName = "MyNewFile.json";
-            subFolder = System.IO.Path.Combine(subFolder, fileName);
-
-            if (!System.IO.File.Exists(subFolder))
-                using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
-            {
-            }
-                }
-                    Console.WriteLine("File created!");
-                {
-
+            // // When application starts system makes new folder structure with a .json file in it
+            // string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
+            // DirectoryInfo di = Directory.CreateDirectory(path);
+            //
+            // DirectoryInfo su = Directory.CreateDirectory(subFolder);
+            // string subFolder = System.IO.Path.Combine(path, "SubFolder");
+            //
+            // string fileName = "MyNewFile.json";
+            // subFolder = System.IO.Path.Combine(subFolder, fileName);
+            //
+            // if (!System.IO.File.Exists(subFolder))
+            // {
+            //     using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
+            //     {
+            //         Console.WriteLine("File created!");
+            //
+            //     }
+            // }
         }
 
         //states
@@ -302,13 +297,6 @@ namespace project_bioscooop
                         case 1:
                             currentState = STATE_CATERER_REMOVE_MENU;
                             break;
-                        case 3:
-                            activeUser = null;
-                            currentState = STATE_MAIN;
-                            break;
-                        case 1:
-                            currentState = STATE_CATERER_REMOVE_MENU;
-                            break;
                     }
                 }
                 else
@@ -414,14 +402,6 @@ namespace project_bioscooop
             }
         }
 
-        public static void StateCatererAddMenu()
-        {
-            string name = ConsoleGui.openQuestion("Please give the name of the food item you want to add: ");
-            if (name == "exit")
-            {
-                currentState = STATE_IS_LOGGED_IN;
-                return;
-            }
         public static void stateCustomerShowMovies()
         {
             Movie showMovie =
@@ -441,10 +421,7 @@ namespace project_bioscooop
             currentState = STATE_IS_LOGGED_IN;
             return;
         }
-
-            double price = ConsoleGui.getInteger("Please give the price of the food item: ");
-            
-            int stock = ConsoleGui.getInteger("Please give the stock of the food item: ");
+        
         public static void stateCustomerShowCatererMenu()
         {
             MenuItem showFoodItem =
@@ -464,27 +441,7 @@ namespace project_bioscooop
             currentState = STATE_IS_LOGGED_IN;
             return;
         }
-
-            MenuItem newFoodItem = new MenuItem(name, price, stock);
-
-            int check = ConsoleGui.multipleChoice(
-                "Do you want to add the food item : " + newFoodItem.getName() + "(" + newFoodItem.getId() + ")" +
-                " with the price of " + newFoodItem.getPrice() + " euro with a stock quantity of " + newFoodItem.getStock(),
-                "yyes", "nno");
-            switch (check)
-            {
-                case 1:
-                    currentState = STATE_IS_LOGGED_IN;
-                    return;
-                case 0:
-                    menuItem.Add(newFoodItem.getId(), newFoodItem);
-                    break;
-            }
-
-            Console.Out.WriteLine("Current food items : \n");
-            ConsoleGui.list(menuItem);
-            currentState = STATE_IS_LOGGED_IN;
-            return;
+        
         public static void StateCatererAddMenu()
         {
             string name = ConsoleGui.openQuestion("Please give the name of the food item you want to add: ");
@@ -495,12 +452,14 @@ namespace project_bioscooop
             }
 
             int price = ConsoleGui.getInteger("Please give the price of the food item: ");
+            
+            int stock = ConsoleGui.getInteger("Please give the stock amount of the food item: ");
 
-            MenuItem newFoodItem = new MenuItem(name, price);
+            MenuItem newFoodItem = new MenuItem(name, price, stock);
 
             int check = ConsoleGui.multipleChoice(
                 "Do you want to add the food item : " + newFoodItem.getName() + "(" + newFoodItem.getId() + ")" +
-                " with the price of " + newFoodItem.getPrice() + " euro",
+                " with the price of " + newFoodItem.getPrice() + " euro with a stock quantity of " + newFoodItem.getStock(),
                 "yyes", "nno");
             switch (check)
             {
