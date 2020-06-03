@@ -1250,15 +1250,11 @@ namespace project_bioscooop
             public readonly Movie movie;
             public readonly Account account;
             public int price;
-<<<<<<<
       
             public void list()
             {
                 throw new NotImplementedException();
             }
-=======
-
->>>>>>>
 
             public string getMPQListing()
             {
@@ -1603,7 +1599,7 @@ namespace project_bioscooop
             {
                 runningMovie = inp_movie;
             }
-
+            
             public TimeSlot(TimeSpan inp_begin, TimeSpan inp_end, SeatGroup[] inp_seatgroups)
             {
                 begin = inp_begin;
@@ -1732,7 +1728,6 @@ namespace project_bioscooop
                     possibleInputs[i] = newAns;
                     Console.Out.WriteLine(listOption);
                 }
-            }
 
                 //add exit for escape
                 Console.Out.WriteLine("[X] Exit\n");
@@ -1759,10 +1754,6 @@ namespace project_bioscooop
             }
         }
 
-                    //list option and save possible answer
-                    possibleInputs[i] = newAns;
-                    Console.Out.WriteLine(listOption);
-                }
 
         public static int getInteger(string question)
         {
