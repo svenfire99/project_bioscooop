@@ -90,15 +90,17 @@ namespace project_bioscooop
                     case STATE_MANAGER_REMOVE_THEATER:
                         stateManagerRemoveTheater();
                         break;
+                    case STATE_MANAGER_MANAGE_THEATER:
+                        stateManagerManageTheater();
+                        break;
+                    
                     case STATE_CATERER_ADD_MENU:
                         StateCatererAddMenu();
                         break;
                     case STATE_CATERER_REMOVE_MENU:
                         stateCatererRemoveMenu();
                         break;
-                    case STATE_MANAGER_MANAGE_THEATER:
-                        stateManagerManageTheater();
-                        break;
+                    
                     case STATE_CUSTOMER_SHOW_MOVIES:
                         showMovies();
                         break;
@@ -411,7 +413,7 @@ namespace project_bioscooop
 
             int check = ConsoleGui.multipleChoice(
                 "Do you want to add the food item : " + newFoodItem.getName() + "(" + newFoodItem.getId() + ")" +
-                " with the price of €" + newFoodItem.getPrice() + " with a stock quantity of " + newFoodItem.getStock(),
+                " with the price of " + newFoodItem.getPrice() + " euro with a stock quantity of " + newFoodItem.getStock(),
                 "yyes", "nno");
             switch (check)
             {
@@ -746,7 +748,7 @@ namespace project_bioscooop
             ConsoleGui.list(runningMovies);
             
             
-            int choice = ConsoleGui.multipleChoice("", "tbuy a ticket",
+            int choice = ConsoleGui.multipleChoice("What do you want to do? ", "tbuy a ticket",
                 "bback");
             switch (choice)
             {
