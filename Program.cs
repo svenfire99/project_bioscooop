@@ -53,6 +53,8 @@ namespace project_bioscooop
         private const int STATE_CUSTOMER_PURCHASE_BASKET = 36;
         private const int STATE_CUSTOMER_VIEW_PURCHASE = 37;
 
+        private const int STATE_EMPLOYEE_SHOW_MOVIES = 40;
+
         private static int currentState = 0;
         private static Account activeUser = null;
 
@@ -124,6 +126,10 @@ namespace project_bioscooop
                     // case STATE_CUSTOMER_VIEW_PURCHASE:
                     //     viewPurchasedBasket();
                     //     break;
+                    
+                    case STATE_EMPLOYEE_SHOW_MOVIES:
+                        showEmployeeMovies();
+                        break;
                 }
             }
         }
@@ -133,9 +139,9 @@ namespace project_bioscooop
         {
             //create admin account
             accountList.Add("admin", new Account("admin", "admin", 420, "admin", Account.ROLE_ADMIN));
-            accountList.Add("caterer",
-                new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
-            accountList.Add("frontend", new Account("frontend", "frontend", 420, "frontend", Account.ROLE_USER));
+            accountList.Add("caterer", new Account("caterer", "caterer", 420, "caterer@gmail.com", Account.ROLE_CATERING));
+            accountList.Add("frontend", new Account("frontend","frontend", 420, "frontend", Account.ROLE_USER));
+            accountList.Add("employee", new Account("employee", "employee", 420, "employee@gamil.com", Account.ROLE_EMPLOYEE));
 
             // Generator.generateMovieData(100, movieList);
             movieList.Add("-1", Movie.getNoneMovie());
@@ -151,24 +157,24 @@ namespace project_bioscooop
             theaterList.Add(testTheater.getId(), testTheater);
             theaterList.Add(testTheater2.getId(), testTheater2);
 
-            // // When application starts system makes new folder structure with a .json file in it
-            // string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
-            // DirectoryInfo di = Directory.CreateDirectory(path);
-            //
-            // DirectoryInfo su = Directory.CreateDirectory(subFolder);
-            // string subFolder = System.IO.Path.Combine(path, "SubFolder");
-            //
-            // string fileName = "MyNewFile.json";
-            // subFolder = System.IO.Path.Combine(subFolder, fileName);
-            //
-            // if (!System.IO.File.Exists(subFolder))
-            // {
-            //     using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
-            //     {
-            //         Console.WriteLine("File created!");
-            //
-            //     }
-            // }
+            // When application starts system makes new folder structure with a .json file in it
+            string path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\Json folder"));
+            DirectoryInfo di = Directory.CreateDirectory(path);
+            
+            DirectoryInfo su = Directory.CreateDirectory(subFolder);
+            string subFolder = System.IO.Path.Combine(path, "SubFolder");
+            
+            string fileName = "MyNewFile.json";
+            subFolder = System.IO.Path.Combine(subFolder, fileName);
+            
+            if (!System.IO.File.Exists(subFolder))
+            {
+                using (System.IO.FileStream fs = System.IO.File.Create(subFolder))
+                {
+                    Console.WriteLine("File created!");
+            
+                }
+            }
         }
 
         //states
@@ -319,12 +325,14 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for employee menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies","llog out"))
+                        "ccheck available movies", "llog out"))
                     {
                         case -1:
                             activeUser = null;
                             currentState = STATE_MAIN;
                             break;
+                        case 0:
+                            currentState = STATE_EMPLOYEE_SHOW_MOVIES;
                         case 1:
                             activeUser = null;
                             currentState = STATE_MAIN;
@@ -406,6 +414,25 @@ namespace project_bioscooop
                     adminMenu(activeUser.role);
                     break;
             }
+        }
+
+        public static void showEmployeeMovies()
+        {
+            Movie showMovie =
+                (Movie) ConsoleGui.getElementByMultipleChoice("Which movie would you like to choose?", movieList);
+
+            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
+            
+            switch (ans)
+            {
+                case 1:
+                    currentState = STATE_IS_LOGGED_IN;
+                    break;
+            }
+            
+            ConsoleGui.list(movieList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
         }
 
         public static void stateCustomerShowMovies()
