@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
@@ -174,7 +175,7 @@ namespace project_bioscooop
         public static void stateMain()
         {
             int choice = ConsoleGui.multipleChoice("Welcome to Cinema, What would you like to do?", "llogin",
-                "ccreate account");
+                "ccreate account", "aabout us");
             switch (choice)
             {
                 case -1:
@@ -183,9 +184,11 @@ namespace project_bioscooop
                 case 0:
                     currentState = STATE_LOG_IN;
                     break;
-
                 case 1:
                     currentState = STATE_CREATE_ACCOUNT;
+                    break;
+                case 2:
+                    showAboutUs();
                     break;
             }
         }
@@ -255,7 +258,7 @@ namespace project_bioscooop
                 if (role == Account.ROLE_USER)
                 {
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "ssee my account", "msee menu", "bsee basket"))
+                        "ccheck available movies", "ssee my account", "msee menu", "bsee basket", "aabout us"))
                     {
                         case -1:
                             activeUser = null;
@@ -264,11 +267,14 @@ namespace project_bioscooop
                         case 0:
                             currentState = STATE_CUSTOMER_SHOW_MOVIES;
                             break;
-                        case 1:
+                        case 2:
                             currentState = STATE_CUSTOMER_SHOW_CATHERING;
                             break;
-                        case 2:
+                        case 3:
                             currentState = STATE_CUSTOMER_SHOW_BASKET;
+                            break;
+                        case 4:
+                            showAboutUs();
                             break;
                     }
                 }
@@ -938,6 +944,13 @@ namespace project_bioscooop
                     break;
             }
             Console.Out.WriteLine("Welp... since there is no payment method yet everything is free!");
+            return;
+        }
+
+        public static void showAboutUs()
+        {
+            Console.Out.WriteLine("Here you can display everything about the cinema, \n" +
+                                  "but for now it's a place holder to put anything here!");
             return;
         }
         
