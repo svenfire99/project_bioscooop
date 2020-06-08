@@ -146,7 +146,7 @@ namespace project_bioscooop
                     //     break;
                     
                     case STATE_EMPLOYEE_SHOW_MOVIES:
-                        showMovies();
+                        showMoviesEmployee();
                         break;
                     case STATE_EMPLOYEE_SHOW_BASKETS:
                         showAllBaskets();
@@ -874,6 +874,33 @@ namespace project_bioscooop
                                   "Name : " +accountSel.name + "\n" +
                                   "Age  : " +accountSel.age + "\n" +
                                   "Email: " +accountSel.email);
+        }
+
+        public static void showMoviesEmployee()
+        {
+            Movie movie = null;
+            Dictionary<string, ConsoleGui.Element> runningMovies = getAllRunningMovies();
+            if (runningMovies.Count == 0)
+            {
+                Console.Out.WriteLine("There are no active movies now! \n Come back later.");
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            else
+            {
+                while (movie == null)
+                {
+                    movie = (Movie)ConsoleGui.getElementByMultipleChoice("For which movie do you want to check the theater?", getAllRunningMovies());
+                }
+
+                foreach (Theater theater in getAllTheatersByMovie(movie).Values.ToList())
+                {
+                    Console.Out.WriteLine("For theater: "+ theater.getId().ToString() + " are the timeslots with this movie: ");
+                    ConsoleGui.list(getAllTimeSlotsByTheaterAndMovie(theater,movie));
+                }
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
         }
 
         public static void showMovies()
