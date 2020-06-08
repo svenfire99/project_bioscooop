@@ -23,8 +23,11 @@ namespace project_bioscooop
 
         private static Dictionary<string, ConsoleGui.Element>
             accountList = new Dictionary<string, ConsoleGui.Element>();
+        private static Dictionary<string, ConsoleGui.Element>
+            basketList = new Dictionary<string, ConsoleGui.Element>();
 
         public static Dictionary<string, ConsoleGui.Element> theaterList = new Dictionary<string, ConsoleGui.Element>();
+        
 
         private static Dictionary<string, ConsoleGui.Element> menuItem = new Dictionary<string, ConsoleGui.Element>();
 
@@ -52,6 +55,7 @@ namespace project_bioscooop
         private const int STATE_CUSTOMER_SHOW_BASKET = 35;
         private const int STATE_CUSTOMER_PURCHASE_BASKET = 36;
         private const int STATE_CUSTOMER_VIEW_PURCHASE = 37;
+        private const int STATE_CUSTOMER_SHOW_ACCOUNT = 38;
 
         private const int STATE_EMPLOYEE_SHOW_MOVIES = 40;
 
@@ -110,6 +114,9 @@ namespace project_bioscooop
                     
                     case STATE_CUSTOMER_SHOW_MOVIES:
                         showMovies();
+                        break;
+                    case STATE_CUSTOMER_SHOW_ACCOUNT:
+                        showBasketOfUser();
                         break;
                     case STATE_CUSTOMER_BUY_TICKET_MOVIE:
                         buyTicket();
@@ -273,6 +280,9 @@ namespace project_bioscooop
                             break;
                         case 0:
                             currentState = STATE_CUSTOMER_SHOW_MOVIES;
+                            break;
+                        case 1:
+                            currentState = STATE_CUSTOMER_SHOW_ACCOUNT;
                             break;
                         case 2:
                             currentState = STATE_CUSTOMER_SHOW_CATHERING;
@@ -776,6 +786,32 @@ namespace project_bioscooop
             currentState = STATE_IS_LOGGED_IN;
         }
 
+        public static void showBasketOfUser()
+        {
+            Dictionary<string, ConsoleGui.Element> basketOfUserList = new Dictionary<string, ConsoleGui.Element>();
+            foreach (Basket basket in basketList.Values.ToList())
+            {
+                if (basket.account == activeUser)
+                {
+                    basketOfUserList.Add(basket.id.ToString(),basket);
+                }
+            }
+            if (basketOfUserList.Count == 0)
+            {
+                Console.Out.WriteLine("There are no old baskets! So go buy some tickets and drinks!");
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            
+            Basket basketSel = (Basket) ConsoleGui.getElementByMultipleChoice("Which basket do you want to see? ", basketOfUserList);
+            if (basketSel == null)
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;   
+            }
+            basketSel.showAllBasket();
+        }
+
         public static void showMovies()
         {
             Dictionary<string, ConsoleGui.Element> runningMovies = getAllRunningMovies();
@@ -812,6 +848,8 @@ namespace project_bioscooop
             Movie movie = null;
             Theater theater = null;
             Theater.TimeSlot timeSlot = null;
+            Theater.SeatGroup seatGroup = null;
+            int amount = 0;
             while (movie == null)
             {
                 movie = (Movie)ConsoleGui.getElementByMultipleChoice("For which movie do you want to order a ticket?", getAllRunningMovies());
@@ -822,17 +860,43 @@ namespace project_bioscooop
             }
             while (timeSlot == null)
             {
-                timeSlot = (Theater.TimeSlot)ConsoleGui.getElementByMultipleChoice("For which movie do you want to order a ticket?", getAllTimeSlotsByTheaterAndMovie(theater, movie));
+                timeSlot = (Theater.TimeSlot)ConsoleGui.getElementByMultipleChoice("For which timeslot do you want to order a ticket?", getAllTimeSlotsByTheaterAndMovie(theater, movie));
+            }
+            while (seatGroup == null)
+            {
+                seatGroup = (Theater.SeatGroup)ConsoleGui.getElementByMultipleChoice("For which seating do you want to order a ticket?", getAllSeatGroups(theater));
+            }
+            while (amount < 1)
+            {
+                amount = ConsoleGui.getInteger("How many tickets do you want to buy?");
+                if (amount > seatGroup.getAvailableAmountOfSeats())
+                {
+                    Console.Out.WriteLine("You gave more than the seats Available! So we set it to the max available!");
+                    amount = seatGroup.getAvailableAmountOfSeats();
+                }
             }
             int ans = ConsoleGui.multipleChoice("Do you want to buy a ticket for "+movie.getTitle()+" in theater "+theater.getId()+" with the time slot "+timeSlot.__toString()+" ?", "yyes", "nno");
             if (ans == 0 && movie != null)
             {
-                // TODO INTERGRATE SEATGROUPS
-                // With a small front-end thingy 
-                Ticket ticket = new Ticket(theater, movie, 25);
-                activeUser.basket.addTicketToBasket(ticket, 1);
-                Console.Out.WriteLine("You added a ticket to your basket. The Movie: " + movie.getTitle() + "! \n   See you soon!");
+                seatGroup.sellTicket(amount);
+                if (amount == 1)
+                {
+                    Ticket ticket = new Ticket(theater, seatGroup, movie, 25);
+                    activeUser.basket.addTicketToBasket(ticket, 1);
+                    Console.Out.WriteLine("You added a ticket to your basket. The Movie: " + movie.getTitle() + "! \n   See you soon!");
+                }
+                else
+                {
+                    for (int i = 0; i < amount; i++)
+                    {
+                        Ticket ticket = new Ticket(theater, seatGroup, movie, 25);
+                        activeUser.basket.addTicketToBasket(ticket, 1);
+                        Console.Out.WriteLine("You added " + amount.ToString() + " tickets to your basket. The Movie: " + movie.getTitle() + "! \n   See you all soon!");
+                    }
+                }
+
                 currentState = STATE_IS_LOGGED_IN;
+                return;
             }
             else
             {
@@ -928,7 +992,7 @@ namespace project_bioscooop
                     currentState = STATE_IS_LOGGED_IN;
                     break;
                 case 0:
-                    activeUser.basket.emptyBasket();
+                    activeUser.emptyCurrentBasket(Basket.STATE_PAYED);
                     currentState = STATE_IS_LOGGED_IN;
                     break;
             }
@@ -1010,6 +1074,19 @@ namespace project_bioscooop
 
             return timeSlotsWithMovie;
         }
+
+        private static Dictionary<string, ConsoleGui.Element> getAllSeatGroups(Theater theater)
+        {
+            int seatGroupCounter = -1;
+            Dictionary<string, ConsoleGui.Element> seatGroups = new Dictionary<string, ConsoleGui.Element>();
+            foreach (Theater.SeatGroup seatGroup in theater.getAllSeatGroups())
+            {
+                seatGroupCounter++;
+                seatGroups.Add(seatGroupCounter.ToString(), seatGroup);
+            }
+
+            return seatGroups;
+        }
         
         private static Dictionary<string, ConsoleGui.Element> getAllFoodItems()
         {
@@ -1059,106 +1136,6 @@ namespace project_bioscooop
                 return AccountIDCounter;
             }
 
-            public class Basket
-            {
-                private const int STATE_FAILED = -1;
-                private const int STATE_PENDING = 0;
-                private const int STATE_PAYED = 1;
-                private const int STATE_CANCELLED = 4;
-
-                public int id;
-                public Account account;
-                public Dictionary<int, ConsoleGui.Element> basketFoodItems = new Dictionary<int, ConsoleGui.Element>();
-                public Dictionary<int, ConsoleGui.Element> basketTickets = new Dictionary<int, ConsoleGui.Element>();
-                public int state;
-
-                private int foodBasketCounter = -1;
-                private int ticketBasketCounter = -1;
-
-                public void addFoodToBasket(MenuItem menuItem, int amount)
-                {
-                    foodBasketCounter++;
-                    BasketFoodItem basketFoodItem = new BasketFoodItem(menuItem, amount);
-                    basketFoodItems.Add(foodBasketCounter, basketFoodItem);
-                }
-
-                public void addTicketToBasket(Ticket ticket, int amount)
-                {
-                    ticketBasketCounter++;
-                    BasketTicketItem basketFoodItem = new BasketTicketItem(ticket, amount);
-                    basketTickets.Add(ticketBasketCounter, basketFoodItem);
-                }
-
-                public void emptyBasket()
-                {
-                    basketFoodItems = new Dictionary<int, ConsoleGui.Element>();
-                    basketTickets = new Dictionary<int, ConsoleGui.Element>();
-                }
-
-                public Boolean isBasketEmtpy()
-                {
-                    if (basketTickets.Count == 0 && basketFoodItems.Count == 0)
-                    {
-                        return true;
-                    } 
-
-                    return false;
-                }
-
-                public void showAllBasket()
-                {
-                    Console.Out.WriteLine("Your basket contents: ");
-                    ConsoleGui.list(basketFoodItems);
-                    ConsoleGui.list(basketTickets);
-                }
-
-                class BasketFoodItem : ConsoleGui.Element
-                {
-                    public readonly MenuItem menuItem;
-                    public readonly int amount;
-
-                    public BasketFoodItem(MenuItem menuItem, int amount)
-                    {
-                        this.menuItem = menuItem;
-                        this.amount = amount;
-                    }
-
-                    public override void list()
-                    {
-                        Console.Out.WriteLine("  - " + menuItem.getName() + " x " + amount.ToString() + " - " +
-                                              (menuItem.getPrice() * amount).ToString() + " euro");
-                    }
-
-                    public override string getMPQListing()
-                    {
-                        return "id: " + menuItem.getName() + "   x " + amount;
-                    }
-                }
-
-                class BasketTicketItem : ConsoleGui.Element
-                {
-                    public readonly Ticket ticket;
-                    public readonly int amount;
-
-                    public BasketTicketItem(Ticket ticket, int amount)
-                    {
-                        this.ticket = ticket;
-                        this.amount = amount;
-                    }
-
-                    public override void list()
-                    {
-                        Console.Out.WriteLine("  - " + ticket.getMovie().getTitle() + " x " + amount.ToString() + " - " + (ticket.price * amount).ToString() + " euro");
-                    }
-
-                    public override string getMPQListing()
-                    {
-                        return "id: " + ticket.getMovie().getTitle() + "   x " + amount;
-                    }
-                }
-            }
-
-
             public Account(string inp_name, string inp_password, int inp_age, string inp_email, int inp_permission)
             {
                 role = inp_permission;
@@ -1178,6 +1155,128 @@ namespace project_bioscooop
             public override string getMPQListing()
             {
                 return "id: " + accountId + "   name: " + name;
+            }
+
+            public void emptyCurrentBasket(int state)
+            {
+                this.basket.state = state;
+                basketList.Add(this.basket.id.ToString(),this.basket);
+                this.basket = new Basket();
+            }
+        }
+
+        public class Basket : ConsoleGui.Element
+        {
+            public const int STATE_FAILED = -1;
+            public const int STATE_PENDING = 0;
+            public const int STATE_PAYED = 1;
+            public const int STATE_CANCELLED = 4;
+
+            public int id;
+            public Account account;
+            public Dictionary<int, ConsoleGui.Element> basketFoodItems = new Dictionary<int, ConsoleGui.Element>();
+            public Dictionary<int, ConsoleGui.Element> basketTickets = new Dictionary<int, ConsoleGui.Element>();
+            public int state;
+
+            private int idCounter = -1;
+            private int foodBasketCounter = -1;
+            private int ticketBasketCounter = -1;
+
+            public Basket()
+            {
+                idCounter++;
+                id = idCounter;
+                basketFoodItems = new Dictionary<int, ConsoleGui.Element>();
+                basketTickets = new Dictionary<int, ConsoleGui.Element>();
+                account = activeUser;
+                state = STATE_PENDING;
+            }
+
+            public void addFoodToBasket(MenuItem menuItem, int amount)
+            {
+                foodBasketCounter++;
+                BasketFoodItem basketFoodItem = new BasketFoodItem(menuItem, amount);
+                basketFoodItems.Add(foodBasketCounter, basketFoodItem);
+            }
+
+            public void addTicketToBasket(Ticket ticket, int amount)
+            {
+                ticketBasketCounter++;
+                BasketTicketItem basketFoodItem = new BasketTicketItem(ticket, amount);
+                basketTickets.Add(ticketBasketCounter, basketFoodItem);
+            }
+
+            public Boolean isBasketEmtpy()
+            {
+                if (basketTickets.Count == 0 && basketFoodItems.Count == 0)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            public void showAllBasket()
+            {
+                Console.Out.WriteLine("Your basket contents: ");
+                ConsoleGui.list(basketFoodItems);
+                ConsoleGui.list(basketTickets);
+            }
+
+            class BasketFoodItem : ConsoleGui.Element
+            {
+                public readonly MenuItem menuItem;
+                public readonly int amount;
+
+                public BasketFoodItem(MenuItem menuItem, int amount)
+                {
+                    this.menuItem = menuItem;
+                    this.amount = amount;
+                }
+
+                public override void list()
+                {
+                    Console.Out.WriteLine("  - " + menuItem.getName() + " x " + amount.ToString() + " - " +
+                                          (menuItem.getPrice() * amount).ToString() + " euro");
+                }
+
+                public override string getMPQListing()
+                {
+                    return "id: " + menuItem.getName() + "   x " + amount;
+                }
+            }
+
+            class BasketTicketItem : ConsoleGui.Element
+            {
+                public readonly Ticket ticket;
+                public readonly int amount;
+
+                public BasketTicketItem(Ticket ticket, int amount)
+                {
+                    this.ticket = ticket;
+                    this.amount = amount;
+                }
+
+                public override void list()
+                {
+                    Console.Out.WriteLine("  - " + ticket.getMovie().getTitle() + " x " + amount.ToString() +
+                                          " - " + (ticket.price * amount).ToString() + " euro");
+                }
+
+                public override string getMPQListing()
+                {
+                    return "id: " + ticket.getMovie().getTitle() + "   x " + amount;
+                }
+            }
+
+            public override void list()
+            {
+                Console.Out.WriteLine("id: " + id + "  user :" + account);
+            }
+
+            public override string getMPQListing()
+            {
+                return "id: " + id + "  user :" + account;
             }
         }
 
@@ -1210,6 +1309,7 @@ namespace project_bioscooop
             public readonly Theater theater;
             public readonly Movie movie;
             public readonly Account account;
+            public readonly Theater.SeatGroup seatGroup;
             public int price;
       
             public void list()
@@ -1222,12 +1322,13 @@ namespace project_bioscooop
                 throw new NotImplementedException();
             }
 
-            public Ticket(Theater theater, Movie movie, int price)
+            public Ticket(Theater theater, Theater.SeatGroup seatGroup, Movie movie, int price)
             {
                 this.theater = theater;
                 this.movie = movie;
                 this.account = activeUser;
                 this.price = price;
+                this.seatGroup = seatGroup;
             }
 
             public Movie getMovie()
@@ -1431,6 +1532,11 @@ namespace project_bioscooop
             return output;
         }
 
+        public Array getAllSeatGroups()
+        {
+            return seatGroups;
+        }
+
         public string getId()
         {
             return theaterId;
@@ -1489,12 +1595,23 @@ namespace project_bioscooop
         }
 
         //data holder for SeatGroup seats and prices
-        public class SeatGroup
+        public class SeatGroup : ConsoleGui.Element
         {
             private int amountOfSeats;
             private int amountOfAvailableSeats;
             private int priceOfGroup;
             private string description;
+
+
+            public override void list()
+            {
+                Console.Out.WriteLine(getMPQListing());
+            }
+
+            public override string getMPQListing()
+            {
+                return "amount of seats: " + amountOfSeats + " (Available: " + amountOfAvailableSeats + ") with price: "+priceOfGroup;
+            }
 
             public SeatGroup(int inp_amountOfSeats, int inp_priceOfSeats, string inp_description)
             {
@@ -1504,10 +1621,9 @@ namespace project_bioscooop
                 description = inp_description;
             }
 
-            public void sellTicket()
+            public void sellTicket(int amountSold = 1)
             {
-                amountOfAvailableSeats--;
-                //TODO change state to ticketSellingState
+                amountOfAvailableSeats -= amountSold;
             }
 
 
