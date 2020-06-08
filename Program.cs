@@ -436,46 +436,6 @@ namespace project_bioscooop
             currentState = STATE_IS_LOGGED_IN;
             return;
         }
-
-        public static void stateCustomerShowMovies()
-        {
-            Movie showMovie =
-                (Movie) ConsoleGui.getElementByMultipleChoice("Which movie would you like to choose?", movieList);
-            
-            
-            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
-            
-            switch (ans)
-            {
-                case 1:
-                    currentState = STATE_IS_LOGGED_IN;
-                    break;
-            }
-            
-            ConsoleGui.list(movieList);
-            currentState = STATE_IS_LOGGED_IN;
-            return;
-        }
-        
-        public static void stateCustomerShowCatererMenu()
-        {
-            MenuItem showFoodItem =
-                (MenuItem) ConsoleGui.getElementByMultipleChoice("Which food item would you like to choose?", menuItem);
-            
-            
-            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
-            
-            switch (ans)
-            {
-             case 1:
-                 currentState = STATE_IS_LOGGED_IN;
-                 break;
-            }
-            
-            ConsoleGui.list(menuItem);
-            currentState = STATE_IS_LOGGED_IN;
-            return;
-        }
         
         public static void StateCatererAddMenu()
         {
