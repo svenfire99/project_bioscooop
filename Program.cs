@@ -55,6 +55,7 @@ namespace project_bioscooop
         private const int STATE_CUSTOMER_SHOW_BASKET = 35;
         private const int STATE_CUSTOMER_PURCHASE_BASKET = 36;
         private const int STATE_CUSTOMER_VIEW_PURCHASE = 37;
+        private const int STATE_CUSTOMER_SHOW_ACCOUNT = 38;
 
         private const int STATE_EMPLOYEE_SHOW_MOVIES = 40;
 
@@ -113,6 +114,9 @@ namespace project_bioscooop
                     
                     case STATE_CUSTOMER_SHOW_MOVIES:
                         showMovies();
+                        break;
+                    case STATE_CUSTOMER_SHOW_ACCOUNT:
+                        showBasketOfUser();
                         break;
                     case STATE_CUSTOMER_BUY_TICKET_MOVIE:
                         buyTicket();
@@ -276,6 +280,9 @@ namespace project_bioscooop
                             break;
                         case 0:
                             currentState = STATE_CUSTOMER_SHOW_MOVIES;
+                            break;
+                        case 1:
+                            currentState = STATE_CUSTOMER_SHOW_ACCOUNT;
                             break;
                         case 2:
                             currentState = STATE_CUSTOMER_SHOW_CATHERING;
@@ -777,6 +784,32 @@ namespace project_bioscooop
 
             //if no theater or timeslot is chosen, go back to logged in menu
             currentState = STATE_IS_LOGGED_IN;
+        }
+
+        public static void showBasketOfUser()
+        {
+            Dictionary<string, ConsoleGui.Element> basketOfUserList = new Dictionary<string, ConsoleGui.Element>();
+            foreach (Basket basket in basketList.Values.ToList())
+            {
+                if (basket.account == activeUser)
+                {
+                    basketOfUserList.Add(basket.id.ToString(),basket);
+                }
+            }
+            if (basketOfUserList.Count == 0)
+            {
+                Console.Out.WriteLine("There are no old baskets! So go buy some tickets and drinks!");
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            
+            Basket basketSel = (Basket) ConsoleGui.getElementByMultipleChoice("Which basket do you want to see? ", basketOfUserList);
+            if (basketSel == null)
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;   
+            }
+            basketSel.showAllBasket();
         }
 
         public static void showMovies()
