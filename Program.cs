@@ -43,6 +43,8 @@ namespace project_bioscooop
         private const int STATE_MANAGER_ADD_THEATER = 14;
         private const int STATE_MANAGER_REMOVE_THEATER = 15;
         private const int STATE_MANAGER_MANAGE_THEATER = 16;
+        private const int STATE_MANAGER_SHOW_TICKETS = 17;
+        private const int STATE_MANAGER_SHOW_BASKETS = 18;
       
         private const int STATE_CATERER_ADD_MENU = 20;
         private const int STATE_CATERER_REMOVE_MENU = 22;
@@ -58,6 +60,8 @@ namespace project_bioscooop
         private const int STATE_CUSTOMER_SHOW_ACCOUNT = 38;
 
         private const int STATE_EMPLOYEE_SHOW_MOVIES = 40;
+        private const int STATE_EMPLOYEE_SHOW_BASKETS = 41;
+        private const int STATE_EMPLOYEE_SHOW_TICKETS = 42;
 
         private static int currentState = 0;
         private static Account activeUser = null;
@@ -104,6 +108,12 @@ namespace project_bioscooop
                     case STATE_MANAGER_MANAGE_THEATER:
                         stateManagerManageTheater();
                         break;
+                    case STATE_MANAGER_SHOW_TICKETS:
+                        showTickets();
+                        break;
+                    case STATE_MANAGER_SHOW_BASKETS:
+                        showAllBaskets();
+                        break;
                     
                     case STATE_CATERER_ADD_MENU:
                         StateCatererAddMenu();
@@ -135,7 +145,13 @@ namespace project_bioscooop
                     //     break;
                     
                     case STATE_EMPLOYEE_SHOW_MOVIES:
-                        showEmployeeMovies();
+                        showMovies();
+                        break;
+                    case STATE_EMPLOYEE_SHOW_BASKETS:
+                        showAllBaskets();
+                        break;
+                    case STATE_EMPLOYEE_SHOW_TICKETS:
+                        showTickets();
                         break;
                 }
             }
@@ -336,7 +352,7 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for employee menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "llog out"))
+                        "ccheck available movies", "bshow All Baskets", "tshow all tickets"))
                     {
                         case -1:
                             activeUser = null;
@@ -346,8 +362,10 @@ namespace project_bioscooop
                             currentState = STATE_EMPLOYEE_SHOW_MOVIES;
                             break;
                         case 1:
-                            activeUser = null;
-                            currentState = STATE_MAIN;
+                            currentState = STATE_EMPLOYEE_SHOW_BASKETS;
+                            break;
+                        case 2:
+                            currentState = STATE_EMPLOYEE_SHOW_TICKETS;
                             break;
                     }
                 }
@@ -366,7 +384,7 @@ namespace project_bioscooop
                     //TODO add switch case for Admin menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
                         "1add movie", "2remove movie", "3edit movie", "4add theater", "5remove theater",
-                        "6manage theater"))
+                        "6manage theater", "7show All Tickets", "6show All Baskets"))
                     {
                         case -1:
                             activeUser = null;
@@ -395,6 +413,14 @@ namespace project_bioscooop
 
                         case 5:
                             currentState = STATE_MANAGER_MANAGE_THEATER;
+                            break;
+                        
+                        case 6:
+                            currentState = STATE_MANAGER_SHOW_TICKETS;
+                            break;
+                        
+                        case 7:
+                            currentState = STATE_MANAGER_SHOW_BASKETS;
                             break;
                     }
                 }
@@ -426,25 +452,6 @@ namespace project_bioscooop
                     adminMenu(activeUser.role);
                     break;
             }
-        }
-
-        public static void showEmployeeMovies()
-        {
-            Movie showMovie =
-                (Movie) ConsoleGui.getElementByMultipleChoice("Which movie would you like to choose?", movieList);
-
-            int ans = ConsoleGui.multipleChoice("Are you sure?", "yyes", "nno");
-            
-            switch (ans)
-            {
-                case 1:
-                    currentState = STATE_IS_LOGGED_IN;
-                    break;
-            }
-            
-            ConsoleGui.list(movieList);
-            currentState = STATE_IS_LOGGED_IN;
-            return;
         }
         
         public static void StateCatererAddMenu()
@@ -812,6 +819,36 @@ namespace project_bioscooop
             basketSel.showAllBasket();
         }
 
+        public static void showAllBaskets()
+        {
+            if (basketList.Count == 0)
+            {
+                Console.Out.WriteLine("There are payed baskets yet.");
+                currentState = STATE_IS_LOGGED_IN;
+                return;  
+            }
+            Basket basketSel = (Basket) ConsoleGui.getElementByMultipleChoice("Which basket do you want to see? ", basketList);
+            if (basketSel == null)
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;   
+            }
+            basketSel.showAllBasket();
+        }
+
+        public static void showTickets()
+        {
+            if (ticketList.Count == 0)
+            {
+                Console.Out.WriteLine("No one bought a ticket yet!");
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            ConsoleGui.list(ticketList);
+            currentState = STATE_IS_LOGGED_IN;
+            return;
+        }
+
         public static void showMovies()
         {
             Dictionary<string, ConsoleGui.Element> runningMovies = getAllRunningMovies();
@@ -883,6 +920,7 @@ namespace project_bioscooop
                 {
                     Ticket ticket = new Ticket(theater, seatGroup, movie, 25);
                     activeUser.basket.addTicketToBasket(ticket, 1);
+                    ticketList.Add(ticket.ticketID,ticket);
                     Console.Out.WriteLine("You added a ticket to your basket. The Movie: " + movie.getTitle() + "! \n   See you soon!");
                 }
                 else
@@ -891,6 +929,7 @@ namespace project_bioscooop
                     {
                         Ticket ticket = new Ticket(theater, seatGroup, movie, 25);
                         activeUser.basket.addTicketToBasket(ticket, 1);
+                        ticketList.Add(ticket.ticketID,ticket);
                         Console.Out.WriteLine("You added " + amount.ToString() + " tickets to your basket. The Movie: " + movie.getTitle() + "! \n   See you all soon!");
                     }
                 }
