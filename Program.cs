@@ -62,6 +62,7 @@ namespace project_bioscooop
         private const int STATE_EMPLOYEE_SHOW_MOVIES = 40;
         private const int STATE_EMPLOYEE_SHOW_BASKETS = 41;
         private const int STATE_EMPLOYEE_SHOW_TICKETS = 42;
+        private const int STATE_EMPLOYEE_SHOW_ACCOUNTS = 43;
 
         private static int currentState = 0;
         private static Account activeUser = null;
@@ -145,13 +146,16 @@ namespace project_bioscooop
                     //     break;
                     
                     case STATE_EMPLOYEE_SHOW_MOVIES:
-                        showMovies();
+                        showMoviesEmployee();
                         break;
                     case STATE_EMPLOYEE_SHOW_BASKETS:
                         showAllBaskets();
                         break;
                     case STATE_EMPLOYEE_SHOW_TICKETS:
                         showTickets();
+                        break;
+                    case STATE_EMPLOYEE_SHOW_ACCOUNTS:
+                        showAccounts();
                         break;
                 }
             }
@@ -352,7 +356,7 @@ namespace project_bioscooop
                 {
                     //TODO add switch case for employee menu
                     switch (ConsoleGui.multipleChoice("Hi " + activeUser.name + " what would you like to do?",
-                        "ccheck available movies", "bshow All Baskets", "tshow all tickets"))
+                        "ccheck available movies", "bshow All Baskets", "tshow all tickets", "ashow all customer accounts"))
                     {
                         case -1:
                             activeUser = null;
@@ -366,6 +370,9 @@ namespace project_bioscooop
                             break;
                         case 2:
                             currentState = STATE_EMPLOYEE_SHOW_TICKETS;
+                            break;
+                        case 3:
+                            currentState = STATE_EMPLOYEE_SHOW_ACCOUNTS;
                             break;
                     }
                 }
@@ -849,6 +856,53 @@ namespace project_bioscooop
             return;
         }
 
+        public static void showAccounts()
+        {
+            if (getAllCustomerAccounts().Count == 0)
+            {
+                Console.Out.WriteLine("There are no customer accounts!");
+                currentState = STATE_IS_LOGGED_IN;
+                return;  
+            }
+            Account accountSel = (Account) ConsoleGui.getElementByMultipleChoice("Which account do you want to see? ", getAllCustomerAccounts());
+            if (accountSel == null)
+            {
+                currentState = STATE_IS_LOGGED_IN;
+                return;   
+            }
+            Console.Out.WriteLine("ID   : " +accountSel.accountId + "\n" +
+                                  "Name : " +accountSel.name + "\n" +
+                                  "Age  : " +accountSel.age + "\n" +
+                                  "Email: " +accountSel.email);
+        }
+
+        public static void showMoviesEmployee()
+        {
+            Movie movie = null;
+            Dictionary<string, ConsoleGui.Element> runningMovies = getAllRunningMovies();
+            if (runningMovies.Count == 0)
+            {
+                Console.Out.WriteLine("There are no active movies now! \n Come back later.");
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+            else
+            {
+                while (movie == null)
+                {
+                    movie = (Movie)ConsoleGui.getElementByMultipleChoice("For which movie do you want to check the theater?", getAllRunningMovies());
+                }
+
+                foreach (Theater theater in getAllTheatersByMovie(movie).Values.ToList())
+                {
+                    Console.Out.WriteLine("For theater: "+ theater.getId().ToString() + " are the timeslots with this movie: ");
+                    ConsoleGui.list(getAllTimeSlotsByTheaterAndMovie(theater,movie));
+                }
+                currentState = STATE_IS_LOGGED_IN;
+                return;
+            }
+        }
+
         public static void showMovies()
         {
             Dictionary<string, ConsoleGui.Element> runningMovies = getAllRunningMovies();
@@ -1147,6 +1201,21 @@ namespace project_bioscooop
             }
             
             return allFoodItems;
+        }
+
+        private static Dictionary<string, ConsoleGui.Element> getAllCustomerAccounts()
+        {
+            int count = -1;
+            Dictionary<string, ConsoleGui.Element> allCustomerAccounts = new Dictionary<string, ConsoleGui.Element>();
+            foreach (Account account in accountList.Values.ToList())
+            {
+                if (account.role == Account.ROLE_USER)
+                {
+                    allCustomerAccounts.Add(account.accountId.ToString(),account);
+                }
+            }
+
+            return allCustomerAccounts;
         }
         
         
