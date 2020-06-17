@@ -969,21 +969,19 @@ namespace project_bioscooop
             int ans = ConsoleGui.multipleChoice("Do you want to buy a ticket for "+movie.getTitle()+" in theater "+theater.getId()+" with the time slot "+timeSlot.__toString()+" ?", "yyes", "nno");
             if (ans == 0 && movie != null)
             {
+                Ticket ticket = new Ticket(theater, seatGroup, movie, 25);
+                ticketList.Add(ticket.ticketID,ticket);
                 seatGroup.sellTicket(amount);
                 if (amount == 1)
                 {
-                    Ticket ticket = new Ticket(theater, seatGroup, movie, 25);
                     activeUser.basket.addTicketToBasket(ticket, 1);
-                    ticketList.Add(ticket.ticketID,ticket);
                     Console.Out.WriteLine("You added a ticket to your basket. The Movie: " + movie.getTitle() + "! \n   See you soon!");
                 }
                 else
                 {
                     for (int i = 0; i < amount; i++)
                     {
-                        Ticket ticket = new Ticket(theater, seatGroup, movie, 25);
                         activeUser.basket.addTicketToBasket(ticket, 1);
-                        ticketList.Add(ticket.ticketID,ticket);
                         Console.Out.WriteLine("You added " + amount.ToString() + " tickets to your basket. The Movie: " + movie.getTitle() + "! \n   See you all soon!");
                     }
                 }
